@@ -34,11 +34,11 @@ export default function Home() {
           <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-[0_8px_24px_-8px_rgba(139,92,246,0.9)]">
             <ShieldCheck className="size-5" />
           </div>
-          <span className="text-sm font-semibold tracking-tight text-white">
+          <span className="whitespace-nowrap text-sm font-semibold tracking-tight text-white">
             Convertisseur local
           </span>
         </div>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex shrink-0 items-center gap-1 text-sm">
           <a
             href="#catalogue"
             className="rounded-lg px-3 py-1.5 text-white/50 transition hover:bg-white/5 hover:text-white"

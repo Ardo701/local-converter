@@ -78,8 +78,10 @@ async function renderHtmlToCanvas(
   host.setAttribute("aria-hidden", "true");
   host.style.cssText = `position:fixed;left:-10000px;top:0;width:${cssWidth}px;background:#ffffff;z-index:-1;`;
   const doc = new DOMParser().parseFromString(html, "text/html");
-  const style = doc.querySelector("style")?.textContent ?? "";
-  host.innerHTML = `<style>${style}</style><div class="doc-root" style="padding:0">${doc.body.innerHTML}</div>`;
+  const styles = [...doc.querySelectorAll("style")]
+    .map((el) => el.textContent ?? "")
+    .join("\n");
+  host.innerHTML = `<style>${styles}</style><div class="doc-root" style="padding:0">${doc.body.innerHTML}</div>`;
   document.body.appendChild(host);
   try {
     // Give the browser a frame to lay out images and fonts.
