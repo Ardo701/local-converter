@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+.vercel
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+.env*.local
+public/ffmpeg/
+public/wawoff2/
+public/pdfjs/
