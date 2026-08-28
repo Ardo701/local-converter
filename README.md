@@ -32,27 +32,34 @@ tout en laissant les CDN publics accessibles.
 
 ## Ce que l'application sait convertir
 
-| Catégorie | Conversions |
-| --- | --- |
-| Documents | DOCX → HTML / Markdown / TXT / PDF · Markdown → HTML / PDF / DOCX / TXT · HTML → PDF / DOCX / Markdown / TXT / image · PDF → images page par page, texte · RTF → HTML / TXT / Markdown · TXT → PDF |
-| Tableurs & données | XLSX, XLS, ODS → CSV / JSON / HTML / XML · CSV → JSON / XLSX / XML / HTML · JSON → CSV / XLSX / XML / HTML · XML → JSON / CSV / XLSX |
-| Images | JPG, PNG, WebP, BMP, GIF, TIFF, HEIC, SVG → PNG / JPG / WebP (avec échelle, qualité, couleur de fond) · GIF animé → séquence d'images ou sprite sheet |
-| Audio | Tout média → MP3 / WAV / OGG / AAC / FLAC · Parole → TXT / SRT / VTT (Whisper) |
-| Vidéo | Vidéo → MP4 / WEBM / MKV / AVI / MOV / GIF · Vidéo → séquence d'images, mosaïque de vignettes · Suite d'images → MP4 / WEBM / GIF |
-| Archives | N'importe quels fichiers → ZIP / TAR / TAR.GZ / GZ · ZIP, TAR, TAR.GZ, GZ → fichiers extraits |
-| Polices | TTF, OTF → WOFF / WOFF2 · WOFF, WOFF2 → TTF |
-| 3D | OBJ, STL → GLB / glTF · glTF → GLB |
-| Code | SCSS, SASS → CSS · LESS → CSS · TS → JS · TSX, JSX → JS |
+| Catégorie          | Conversions                                                                                                                                                                                        |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Documents          | DOCX → HTML / Markdown / TXT / PDF · Markdown → HTML / PDF / DOCX / TXT · HTML → PDF / DOCX / Markdown / TXT / image · PDF → images page par page, texte · RTF → HTML / TXT / Markdown · TXT → PDF |
+| Tableurs & données | XLSX, XLS, ODS → CSV / JSON / HTML / XML · CSV → JSON / XLSX / XML / HTML · JSON → CSV / XLSX / XML / HTML · XML → JSON / CSV / XLSX                                                               |
+| Images             | JPG, PNG, WebP, BMP, GIF, TIFF, HEIC, SVG → PNG / JPG / WebP (avec échelle, qualité, couleur de fond) · GIF animé → séquence d'images ou sprite sheet                                              |
+| Audio              | Tout média → MP3 / WAV / OGG / AAC / FLAC · Parole → TXT / SRT / VTT (Whisper)                                                                                                                     |
+| Vidéo              | Vidéo → MP4 / WEBM / MKV / AVI / MOV / GIF · Vidéo → séquence d'images, mosaïque de vignettes · Suite d'images → MP4 / WEBM / GIF                                                                  |
+| Archives           | N'importe quels fichiers → ZIP / TAR / TAR.GZ / GZ · ZIP, TAR, TAR.GZ, GZ → fichiers extraits                                                                                                      |
+| Polices            | TTF, OTF → WOFF / WOFF2 · WOFF, WOFF2 → TTF                                                                                                                                                        |
+| 3D                 | OBJ, STL → GLB / glTF · glTF → GLB                                                                                                                                                                 |
+| Code               | SCSS, SASS → CSS · LESS → CSS · TS → JS · TSX, JSX → JS                                                                                                                                            |
 
 ## Interface
 
 Papier chaud, encre noire, un seul accent vermillon, des filets d'un pixel et
-aucun dégradé. Les couleurs vivent dans six variables CSS déclarées une fois
-dans `app/globals.css`, redéfinies pour `prefers-color-scheme: dark` (charcoal
+aucun dégradé. Les couleurs tiennent dans dix variables CSS déclarées une
+fois dans `app/globals.css` et redéfinies en bloc pour le mode sombre (charbon
 chaud, pas bleuté). Typographie : Instrument Serif pour le titre et la marque,
 IBM Plex Sans pour l'interface, IBM Plex Mono pour les codes de format, les
 tailles et les libellés de champs. Les trois sont auto-hébergées par
 `next/font`, donc la page fonctionne sans connexion.
+
+Les deux modes sont sélectionnables depuis l'en-tête : `Auto` suit le système,
+`Clair` et `Sombre` forcent une palette et sont retenus dans `localStorage`. Un
+script court en tête de document réapplique l'attribut `data-theme` avant le
+premier rendu, et le segment actif de la bascule est stylé à partir de cet attribut
+plutôt qu'à partir d'un état React, pour qu'aucune image ne s'affiche dans le
+mauvais thème pendant l'hydratation.
 
 L'outil est construit comme un panneau à trois étapes numérotées (fichiers,
 format, réglages) plutôt que comme une page d'accueil marketing, et le

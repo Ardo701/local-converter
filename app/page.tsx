@@ -1,5 +1,6 @@
 import Catalogue from "@/components/Catalogue";
 import Figures from "@/components/Figures";
+import ThemeToggle from "@/components/ThemeToggle";
 import Workspace from "@/components/Workspace";
 
 const NOTES = [
@@ -21,12 +22,15 @@ export default function Home() {
   return (
     <>
       <header className="border-b border-edge">
-        <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-6">
-          <a href="#" className="display text-[20px] tracking-normal">
+        <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
+          <a
+            href="#"
+            className="display shrink-0 text-[17px] tracking-normal sm:text-[20px]"
+          >
             Convertisseur <span className="italic text-accent">local</span>
           </a>
-          <nav className="flex items-baseline gap-6">
-            <span className="label hidden text-faint sm:inline">
+          <nav className="flex items-center gap-3 sm:gap-6">
+            <span className="label hidden text-faint lg:inline">
               Rien ne quitte cet onglet
             </span>
             <a
@@ -35,6 +39,7 @@ export default function Home() {
             >
               Catalogue
             </a>
+            <ThemeToggle />
           </nav>
         </div>
       </header>
@@ -50,8 +55,8 @@ export default function Home() {
               </h1>
               <p className="mt-6 max-w-[34rem] text-[15.5px] leading-relaxed text-muted">
                 Documents, tableurs, images, audio, vidéo, archives, polices,
-                modèles 3D, code source. Tout est converti sur votre machine, par
-                votre navigateur, sans qu’un octet parte sur un serveur.
+                modèles 3D, code source. Tout est converti sur votre machine,
+                par votre navigateur, sans qu’un octet parte sur un serveur.
               </p>
             </div>
             <div className="md:col-span-4 md:pt-3">

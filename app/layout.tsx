@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans, Instrument_Serif } from "next/font/google";
+import {
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+  Instrument_Serif,
+} from "next/font/google";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -39,7 +43,8 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Convertisseur local",
-    description: "Un convertisseur de fichiers qui tourne dans votre navigateur.",
+    description:
+      "Un convertisseur de fichiers qui tourne dans votre navigateur.",
     type: "website",
   },
 };
@@ -51,14 +56,22 @@ export const viewport: Viewport = {
   ],
 };
 
+// Runs before the first paint so a stored choice never shows up as a flash of
+// the other theme. Without a stored choice the CSS media query decides.
+const APPLY_STORED_THEME = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="fr"
+      suppressHydrationWarning
       className={`${plexSans.variable} ${plexMono.variable} ${instrumentSerif.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: APPLY_STORED_THEME }} />
+      </head>
       <body>{children}</body>
     </html>
   );
