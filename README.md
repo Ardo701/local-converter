@@ -44,6 +44,20 @@ tout en laissant les CDN publics accessibles.
 | 3D | OBJ, STL → GLB / glTF · glTF → GLB |
 | Code | SCSS, SASS → CSS · LESS → CSS · TS → JS · TSX, JSX → JS |
 
+## Interface
+
+Papier chaud, encre noire, un seul accent vermillon, des filets d'un pixel et
+aucun dégradé. Les couleurs vivent dans six variables CSS déclarées une fois
+dans `app/globals.css`, redéfinies pour `prefers-color-scheme: dark` (charcoal
+chaud, pas bleuté). Typographie : Instrument Serif pour le titre et la marque,
+IBM Plex Sans pour l'interface, IBM Plex Mono pour les codes de format, les
+tailles et les libellés de champs. Les trois sont auto-hébergées par
+`next/font`, donc la page fonctionne sans connexion.
+
+L'outil est construit comme un panneau à trois étapes numérotées (fichiers,
+format, réglages) plutôt que comme une page d'accueil marketing, et le
+catalogue est un vrai tableau trié par famille de formats.
+
 ## Architecture
 
 ```

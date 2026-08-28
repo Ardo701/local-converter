@@ -1,23 +1,50 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  AlertTriangle,
-  ArrowRight,
-  Loader2,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
 import Dropzone from "./Dropzone";
 import FileList from "./FileList";
 import OptionsPanel from "./OptionsPanel";
 import Results from "./Results";
 import TargetPicker from "./TargetPicker";
-import { matchingConverters, converterById } from "@/lib/registry";
+import { converterById, matchingConverters } from "@/lib/registry";
 import type { OutFile } from "@/lib/types";
-import { dedupeNames } from "@/lib/utils";
+import { dedupeNames, humanSize } from "@/lib/utils";
 
 type Status = "idle" | "running" | "done" | "error";
+
+function Step({
+  number,
+  title,
+  meta,
+  action,
+}: {
+  number: string;
+  title: string;
+  meta?: string;
+  action?: { label: string; onClick: () => void; disabled?: boolean };
+}) {
+  return (
+    <div className="flex items-baseline gap-3 border-b border-rule px-5 py-2.5">
+      <span className="nums font-mono text-[11px] text-accent">{number}</span>
+      <h2 className="label">{title}</h2>
+      {meta && (
+        <span className="nums truncate font-mono text-[11px] text-faint">
+          {meta}
+        </span>
+      )}
+      {action && (
+        <button
+          type="button"
+          onClick={action.onClick}
+          disabled={action.disabled}
+          className="ml-auto shrink-0 text-[12px] text-muted underline underline-offset-[3px] hover:text-accent disabled:opacity-40"
+        >
+          {action.label}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function Workspace() {
   const [files, setFiles] = useState<File[]>([]);
@@ -30,25 +57,26 @@ export default function Workspace() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<OutFile[]>([]);
-  const resultsRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const available = useMemo(() => matchingConverters(files), [files]);
   const selected = selectedId ? (converterById.get(selectedId) ?? null) : null;
+  const busy = status === "running";
+  const totalSize = files.reduce((sum, file) => sum + file.size, 0);
 
-  // Keep the selection valid whenever the file set changes.
   useEffect(() => {
     if (!available.length) {
       setSelectedId(null);
       return;
     }
-    setSelectedId((current) => {
-      if (current && available.some((c) => c.id === current)) return current;
-      return available[0].id;
-    });
+    setSelectedId((current) =>
+      current && available.some((c) => c.id === current)
+        ? current
+        : available[0].id,
+    );
   }, [available]);
 
-  // Reset option values to the selected converter's defaults.
   useEffect(() => {
     if (!selected?.options) {
       setOptionValues({});
@@ -69,7 +97,6 @@ export default function Workspace() {
         ...current,
         ...incoming.filter((f) => !known.has(`${f.name}:${f.size}`)),
       ];
-      // Bring the workspace into view the first time files land.
       if (!current.length && next.length) {
         requestAnimationFrame(() =>
           sectionRef.current?.scrollIntoView({
@@ -86,7 +113,7 @@ export default function Workspace() {
     if (!selected || !files.length) return;
     setStatus("running");
     setProgress(0);
-    setMessage("Préparation…");
+    setMessage("Préparation");
     setError(null);
     setResults([]);
 
@@ -98,7 +125,7 @@ export default function Workspace() {
           if (note) setMessage(note);
         },
       });
-      if (!output.length) throw new Error("Aucun fichier n'a été produit.");
+      if (!output.length) throw new Error("Aucun fichier n’a été produit.");
       setResults(dedupeNames(output));
       setStatus("done");
       setProgress(1);
@@ -119,46 +146,64 @@ export default function Workspace() {
     }
   }, [files, optionValues, selected]);
 
-  const busy = status === "running";
+  const stepNumbers = {
+    files: "01",
+    format: "02",
+    settings: "03",
+  };
 
   return (
     <section
       id="convertisseur"
       ref={sectionRef}
-      className="mx-auto w-full max-w-5xl scroll-mt-6 px-5"
+      className="mx-auto w-full max-w-5xl scroll-mt-4 px-6 pb-20"
     >
-      <div className="glass-strong rounded-[2rem] p-4 shadow-[0_40px_120px_-40px_rgba(88,28,235,0.55)] sm:p-7">
+      <div className="border border-edge bg-surface">
+        <Step
+          number={stepNumbers.files}
+          title="Fichiers"
+          meta={
+            files.length
+              ? `${files.length} · ${humanSize(totalSize)}`
+              : undefined
+          }
+          action={
+            files.length
+              ? {
+                  label: "Tout retirer",
+                  disabled: busy,
+                  onClick: () => {
+                    setFiles([]);
+                    setResults([]);
+                    setStatus("idle");
+                    setError(null);
+                  },
+                }
+              : undefined
+          }
+        />
+
         {files.length === 0 ? (
-          <>
-            <Dropzone onFiles={addFiles} />
-            <p className="mt-4 flex items-center justify-center gap-2 text-xs text-white/35">
-              <ShieldCheck className="size-3.5 text-emerald-400/70" />
-              Aucun octet n&apos;est transmis — pas d&apos;upload, pas de compte,
-              pas de limite de taille imposée par un serveur.
-            </p>
-          </>
+          <Dropzone onFiles={addFiles} />
         ) : (
-          <div className="space-y-6">
+          <>
             <FileList
               files={files}
               disabled={busy}
               onRemove={(index) =>
                 setFiles((current) => current.filter((_, i) => i !== index))
               }
-              onClear={() => {
-                setFiles([]);
-                setResults([]);
-                setStatus("idle");
-                setError(null);
-              }}
             />
+            <div className="border-t border-rule">
+              <Dropzone onFiles={addFiles} compact />
+            </div>
 
-            <Dropzone onFiles={addFiles} compact />
-
-            <div>
-              <h3 className="mb-3 text-sm font-medium text-white/70">
-                Convertir en…
-              </h3>
+            <div className="border-t border-edge">
+              <Step
+                number={stepNumbers.format}
+                title="Format de sortie"
+                meta={`${available.length} possible${available.length > 1 ? "s" : ""}`}
+              />
               <TargetPicker
                 converters={available}
                 selectedId={selectedId}
@@ -168,72 +213,62 @@ export default function Workspace() {
             </div>
 
             {selected?.options?.length ? (
-              <OptionsPanel
-                options={selected.options}
-                values={optionValues}
-                disabled={busy}
-                onChange={(id, value) =>
-                  setOptionValues((current) => ({ ...current, [id]: value }))
-                }
-              />
+              <div className="border-t border-edge">
+                <Step number={stepNumbers.settings} title="Réglages" />
+                <OptionsPanel
+                  options={selected.options}
+                  values={optionValues}
+                  disabled={busy}
+                  onChange={(id, value) =>
+                    setOptionValues((current) => ({ ...current, [id]: value }))
+                  }
+                />
+              </div>
             ) : null}
 
             {selected && (
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={convert}
-                  disabled={busy || !available.length}
-                  className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 px-6 py-4 text-base font-semibold text-white shadow-[0_18px_50px_-18px_rgba(139,92,246,0.9)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100"
-                >
-                  {busy ? (
-                    <>
-                      <Loader2 className="size-5 animate-spin" />
-                      Conversion en cours…
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="size-5" />
-                      Convertir en {selected.to}
-                      <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-                    </>
-                  )}
-                </button>
-
-                {busy && (
-                  <div className="space-y-2">
-                    <div className="h-2 overflow-hidden rounded-full bg-white/8">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-brand-400 to-accent-400 transition-[width] duration-200"
-                        style={{ width: `${Math.round(progress * 100)}%` }}
-                      />
-                    </div>
-                    <p className="flex items-center justify-between text-xs text-white/45">
-                      <span className="truncate">{message}</span>
-                      <span className="font-mono">
-                        {Math.round(progress * 100)} %
+              <div className="border-t border-edge">
+                <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 px-5 py-4">
+                  <p className="min-w-0 flex-1 font-mono text-[11.5px] text-faint">
+                    {busy ? (
+                      <>
+                        <span className="nums text-accent">
+                          {String(Math.round(progress * 100)).padStart(3, " ")}%
+                        </span>
+                        <span className="ml-3 text-muted">{message}</span>
+                      </>
+                    ) : status === "done" ? (
+                      <span className="text-muted">Terminé.</span>
+                    ) : (
+                      <span>
+                        {files.length} fichier{files.length > 1 ? "s" : ""} →{" "}
+                        {selected.to}
+                        {selected.heavy && " · moteur WebAssembly au 1er usage"}
                       </span>
-                    </p>
-                    {selected.heavy && progress < 0.15 && (
-                      <p className="text-xs text-amber-300/70">
-                        Le moteur WebAssembly se télécharge une seule fois par
-                        session — les conversions suivantes sont immédiates.
-                      </p>
                     )}
-                  </div>
-                )}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={convert}
+                    disabled={busy || !available.length}
+                    className="shrink-0 rounded-[3px] bg-ink px-6 py-2 text-[13.5px] font-medium text-paper transition-colors duration-100 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ink"
+                  >
+                    {busy ? "Conversion…" : "Convertir"}
+                  </button>
+                </div>
+                <div className="h-px w-full bg-rule">
+                  <div
+                    className="h-px bg-accent transition-[width] duration-150"
+                    style={{ width: `${busy || status === "done" ? progress * 100 : 0}%` }}
+                  />
+                </div>
               </div>
             )}
 
             {error && (
-              <div className="flex items-start gap-3 rounded-2xl border border-rose-500/25 bg-rose-500/10 px-4 py-3">
-                <AlertTriangle className="mt-0.5 size-4 shrink-0 text-rose-400" />
-                <div>
-                  <p className="text-sm font-medium text-rose-200">
-                    Conversion impossible
-                  </p>
-                  <p className="mt-0.5 text-xs text-rose-200/70">{error}</p>
-                </div>
+              <div className="border-t border-edge bg-accent-soft px-5 py-3.5">
+                <p className="label text-accent">Échec</p>
+                <p className="mt-1 text-[13.5px] text-ink">{error}</p>
               </div>
             )}
 
@@ -249,7 +284,7 @@ export default function Workspace() {
                 />
               )}
             </div>
-          </div>
+          </>
         )}
       </div>
     </section>

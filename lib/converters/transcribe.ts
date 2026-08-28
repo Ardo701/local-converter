@@ -167,14 +167,18 @@ function transcriptionConverter(format: "txt" | "srt" | "vtt"): Converter {
     srt: "Sous-titres (.srt)",
     vtt: "Sous-titres (.vtt)",
   };
+  const notes = {
+    txt: "Transcription par Whisper. Le texte seul, sans horodatage.",
+    srt: "Transcription horodatée au format SubRip, pour un lecteur vidéo.",
+    vtt: "Transcription horodatée au format WebVTT, pour la balise <track>.",
+  };
   return {
     id: `speech→${format}`,
     to: labels[format],
     from: [...AUDIO_IN, ...VIDEO_IN],
     category: "audio",
     heavy: true,
-    description:
-      "Transcription vocale par Whisper, exécutée entièrement dans le navigateur (WebGPU si disponible).",
+    description: notes[format],
     options: [MODEL_OPTION, LANGUAGE_OPTION],
     async run(files, ctx) {
       const model = String(ctx.options.model ?? "onnx-community/whisper-base");

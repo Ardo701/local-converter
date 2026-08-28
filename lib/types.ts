@@ -78,17 +78,27 @@ export type Converter = {
   run: (files: File[], ctx: ConvertContext) => Promise<OutFile[]>;
 };
 
-export const CATEGORY_META: Record<
-  Category,
-  { label: string; accent: string; icon: string }
-> = {
-  documents: { label: "Documents", accent: "#6366f1", icon: "FileText" },
-  data: { label: "Tableurs & Données", accent: "#10b981", icon: "Table" },
-  images: { label: "Images", accent: "#f59e0b", icon: "Image" },
-  audio: { label: "Audio", accent: "#ec4899", icon: "AudioLines" },
-  video: { label: "Vidéo", accent: "#8b5cf6", icon: "Clapperboard" },
-  archives: { label: "Archives", accent: "#0ea5e9", icon: "FileArchive" },
-  fonts: { label: "Polices", accent: "#f43f5e", icon: "Type" },
-  "3d": { label: "3D", accent: "#22d3ee", icon: "Box" },
-  code: { label: "Code", accent: "#a3e635", icon: "Code2" },
+export const CATEGORY_META: Record<Category, { label: string; code: string }> = {
+  documents: { label: "Documents", code: "DOC" },
+  data: { label: "Tableurs et données", code: "DAT" },
+  images: { label: "Images", code: "IMG" },
+  audio: { label: "Audio", code: "AUD" },
+  video: { label: "Vidéo", code: "VID" },
+  archives: { label: "Archives", code: "ARC" },
+  fonts: { label: "Polices", code: "FNT" },
+  "3d": { label: "Modèles 3D", code: "3D" },
+  code: { label: "Code source", code: "SRC" },
 };
+
+/** Display order for the catalogue and the format list. */
+export const CATEGORY_ORDER: Category[] = [
+  "documents",
+  "data",
+  "images",
+  "audio",
+  "video",
+  "archives",
+  "fonts",
+  "3d",
+  "code",
+];

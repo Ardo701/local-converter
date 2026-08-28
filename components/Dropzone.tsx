@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { FilePlus2, Upload } from "lucide-react";
 import { acceptAttribute } from "@/lib/registry";
 
 type Props = {
@@ -48,47 +47,49 @@ export default function Dropzone({ onFiles, compact = false }: Props) {
           inputRef.current?.click();
         }
       }}
-      className={`group relative w-full cursor-pointer overflow-hidden rounded-3xl border border-dashed transition-all duration-300 ${
-        dragging
-          ? "border-brand-400 bg-brand-500/10 scale-[1.01]"
-          : "border-white/15 hover:border-white/30 hover:bg-white/[0.03]"
-      } ${compact ? "px-5 py-6" : "px-6 py-14 sm:py-20"}`}
+      className={`cursor-pointer text-center transition-colors duration-100 ${
+        dragging ? "bg-accent-soft" : "hover:bg-sunk"
+      } ${compact ? "px-5 py-4" : "px-6 py-16"}`}
     >
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-        style={{
-          background:
-            "radial-gradient(600px circle at 50% 0%, rgba(139,92,246,0.16), transparent 70%)",
-        }}
-      />
-      <div className="relative flex flex-col items-center gap-3 text-center">
-        <div
-          className={`flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-brand-400 transition-transform duration-300 group-hover:-translate-y-0.5 ${
-            compact ? "size-10" : "size-16"
-          }`}
-        >
-          {compact ? (
-            <FilePlus2 className="size-5" />
-          ) : (
-            <Upload className="size-7" />
-          )}
-        </div>
-        <div>
-          <p
-            className={`font-semibold text-white ${compact ? "text-sm" : "text-lg sm:text-xl"}`}
+      {compact ? (
+        <p className="label text-muted">
+          <span className="text-accent">+</span>&nbsp;&nbsp;Ajouter des fichiers
+        </p>
+      ) : (
+        <>
+          <svg
+            viewBox="0 0 32 32"
+            aria-hidden="true"
+            className={`mx-auto size-8 ${dragging ? "text-accent" : "text-edge"}`}
           >
-            {compact
-              ? "Ajouter d'autres fichiers"
-              : "Déposez vos fichiers ici"}
+            <rect
+              x="1"
+              y="1"
+              width="30"
+              height="30"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeDasharray="4 3"
+            />
+            <path
+              d="M16 10v12M10 16h12"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
+          </svg>
+          <p className="mt-5 text-[15px]">
+            Déposez vos fichiers, ou{" "}
+            <span className="text-accent underline underline-offset-[3px]">
+              parcourez votre disque
+            </span>
+            .
           </p>
-          {!compact && (
-            <p className="mt-1.5 text-sm text-white/45">
-              ou cliquez pour parcourir — vos fichiers ne quittent jamais cet
-              onglet
-            </p>
-          )}
-        </div>
-      </div>
+          <p className="mt-1.5 text-[13px] text-faint">
+            Ils sont lus en mémoire. Aucune requête réseau ne les transporte.
+          </p>
+        </>
+      )}
       <input
         ref={inputRef}
         type="file"

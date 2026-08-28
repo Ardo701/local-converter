@@ -342,19 +342,19 @@ export const imageConverters: Converter[] = [
   rasterConverter(
     IMAGE_SOURCES,
     "png",
-    "Rasterise l'image dans un PNG sans perte (transparence conservée).",
+    "Sans perte, transparence conservée. Le bon choix pour les captures et les logos.",
     { scale: true },
   ),
   rasterConverter(
     IMAGE_SOURCES,
     "jpg",
-    "Encode l'image en JPEG, avec un fond opaque à la place de la transparence.",
+    "Compression avec perte. Un fond opaque remplace les zones transparentes.",
     { scale: true },
   ),
   rasterConverter(
     IMAGE_SOURCES,
     "webp",
-    "Encode l'image en WebP, souvent 30 % plus léger qu'un JPEG.",
+    "Environ 30 % plus léger qu’un JPEG à qualité comparable, transparence comprise.",
     { scale: true },
   ),
   gifToFrames,

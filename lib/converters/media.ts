@@ -99,32 +99,38 @@ const AUDIO_TARGETS: Record<
   {
     label: string;
     mime: string;
+    note: string;
     args: (bitrate: string) => string[];
   }
 > = {
   mp3: {
     label: "MP3",
     mime: "audio/mpeg",
+    note: "Le format universel : lu par tout, y compris le matériel ancien.",
     args: (b) => ["-c:a", "libmp3lame", "-b:a", `${b}k`],
   },
   wav: {
     label: "WAV",
     mime: "audio/wav",
+    note: "PCM non compressé. Qualité intacte, fichier volumineux.",
     args: () => ["-c:a", "pcm_s16le"],
   },
   ogg: {
     label: "OGG (Vorbis)",
     mime: "audio/ogg",
+    note: "Libre de brevets, plus efficace que le MP3 à débit égal.",
     args: (b) => ["-c:a", "libvorbis", "-b:a", `${b}k`],
   },
   m4a: {
     label: "AAC (.m4a)",
     mime: "audio/mp4",
+    note: "Le format d’Apple. Tient mieux que le MP3 aux débits bas.",
     args: (b) => ["-c:a", "aac", "-b:a", `${b}k`],
   },
   flac: {
     label: "FLAC",
     mime: "audio/flac",
+    note: "Sans perte : l’original, pour environ la moitié du poids.",
     args: () => ["-c:a", "flac"],
   },
 };
@@ -138,9 +144,7 @@ function audioConverter(target: keyof typeof AUDIO_TARGETS): Converter {
     from: [...AUDIO_IN, ...VIDEO_IN],
     category: "audio",
     heavy: true,
-    description:
-      `Extrait et ré-encode la piste audio en ${spec.label}` +
-      (lossless ? " sans perte." : ", directement dans le navigateur."),
+    description: spec.note,
     options: [...(lossless ? [] : [BITRATE_OPTION]), SAMPLE_RATE_OPTION],
     async run(files, ctx) {
       const out: OutFile[] = [];
@@ -178,11 +182,17 @@ function audioConverter(target: keyof typeof AUDIO_TARGETS): Converter {
 
 const VIDEO_TARGETS: Record<
   string,
-  { label: string; mime: string; args: (crf: string) => string[] }
+  {
+    label: string;
+    mime: string;
+    note: string;
+    args: (crf: string) => string[];
+  }
 > = {
   mp4: {
     label: "MP4 (H.264)",
     mime: "video/mp4",
+    note: "H.264 dans un conteneur MP4 : ce que tout lit, partout.",
     args: (crf) => [
       "-c:v",
       "libx264",
@@ -203,6 +213,7 @@ const VIDEO_TARGETS: Record<
   webm: {
     label: "WEBM (VP8)",
     mime: "video/webm",
+    note: "VP8 dans un conteneur WebM, taillé pour la balise <video>.",
     args: (crf) => [
       "-c:v",
       "libvpx",
@@ -221,6 +232,7 @@ const VIDEO_TARGETS: Record<
   mkv: {
     label: "MKV (H.264)",
     mime: "video/x-matroska",
+    note: "Matroska : le conteneur souple, pratique pour archiver.",
     args: (crf) => [
       "-c:v",
       "libx264",
@@ -239,11 +251,13 @@ const VIDEO_TARGETS: Record<
   avi: {
     label: "AVI",
     mime: "video/x-msvideo",
+    note: "Conteneur historique, pour un logiciel ou un appareil ancien.",
     args: () => ["-c:v", "mpeg4", "-qscale:v", "4", "-c:a", "libmp3lame"],
   },
   mov: {
     label: "MOV",
     mime: "video/quicktime",
+    note: "QuickTime, attendu par les logiciels de montage Apple.",
     args: (crf) => [
       "-c:v",
       "libx264",
@@ -267,7 +281,7 @@ function videoConverter(target: keyof typeof VIDEO_TARGETS): Converter {
     from: [...VIDEO_IN, "gif"],
     category: "video",
     heavy: true,
-    description: `Ré-encode la vidéo en ${spec.label} sans quitter votre machine.`,
+    description: spec.note,
     options: [QUALITY_OPTION, RESOLUTION_OPTION],
     async run(files, ctx) {
       const out: OutFile[] = [];
@@ -653,7 +667,9 @@ function sequenceConverter(target: "mp4" | "webm" | "gif"): Converter {
     batch: true,
     minFiles: 2,
     description:
-      "Assemble toutes les images sélectionnées (triées par nom) en une animation.",
+      target === "gif"
+        ? "Assemble les images (triées par nom) en un GIF qui boucle."
+        : `Assemble les images (triées par nom) en une vidéo ${target === "mp4" ? "MP4" : "WebM"}.`,
     options: [
       {
         id: "fps",

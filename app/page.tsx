@@ -1,110 +1,91 @@
-import { Cpu, Lock, ShieldCheck, WifiOff, Zap } from "lucide-react";
-import Workspace from "@/components/Workspace";
 import Catalogue from "@/components/Catalogue";
-import HeroStats from "@/components/HeroStats";
+import Figures from "@/components/Figures";
+import Workspace from "@/components/Workspace";
 
-const FEATURES = [
+const NOTES = [
   {
-    icon: Lock,
-    title: "Vos fichiers restent chez vous",
-    body: "Aucun formulaire d'upload, aucune requête réseau contenant vos données. Le traitement se fait dans la mémoire de l'onglet, puis tout disparaît.",
+    kicker: "Confidentialité",
+    body: "Il n’y a pas de formulaire d’envoi. Les fichiers sont lus dans la mémoire de l’onglet, transformés là, puis oubliés à la fermeture. Aucun compte, aucun quota, aucun filigrane.",
   },
   {
-    icon: Cpu,
-    title: "WebAssembly à pleine vitesse",
-    body: "FFmpeg, Brotli, Whisper et les décodeurs d'images sont compilés en Wasm et exécutés par votre processeur, pas par une file d'attente distante.",
+    kicker: "Moteurs",
+    body: "FFmpeg, pdf.js, Brotli et les décodeurs d’images sont compilés en WebAssembly et exécutés par votre processeur. Le premier usage télécharge le moteur ; les suivants sont immédiats.",
   },
   {
-    icon: WifiOff,
-    title: "Fonctionne hors ligne",
-    body: "Une fois la page et les moteurs chargés, la connexion devient facultative pour la grande majorité des conversions.",
-  },
-  {
-    icon: Zap,
-    title: "Sans limite de quota",
-    body: "Pas de compte, pas de filigrane, pas de « 2 fichiers par jour ». La seule limite est la mémoire disponible de votre machine.",
+    kicker: "Limites",
+    body: "Un PDF scanné ne rendra pas de texte : il n’y a pas d’OCR. Une vidéo de plusieurs gigaoctets saturera la mémoire de l’onglet bien avant votre disque.",
   },
 ];
 
 export default function Home() {
   return (
-    <main className="relative">
-      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-5 py-6">
-        <div className="flex items-center gap-2.5">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-[0_8px_24px_-8px_rgba(139,92,246,0.9)]">
-            <ShieldCheck className="size-5" />
-          </div>
-          <span className="whitespace-nowrap text-sm font-semibold tracking-tight text-white">
-            Convertisseur local
-          </span>
+    <>
+      <header className="border-b border-edge">
+        <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-6">
+          <a href="#" className="display text-[20px] tracking-normal">
+            Convertisseur <span className="italic text-accent">local</span>
+          </a>
+          <nav className="flex items-baseline gap-6">
+            <span className="label hidden text-faint sm:inline">
+              Rien ne quitte cet onglet
+            </span>
+            <a
+              href="#catalogue"
+              className="text-[13.5px] underline decoration-edge underline-offset-[3px] hover:decoration-accent"
+            >
+              Catalogue
+            </a>
+          </nav>
         </div>
-        <nav className="flex shrink-0 items-center gap-1 text-sm">
-          <a
-            href="#catalogue"
-            className="rounded-lg px-3 py-1.5 text-white/50 transition hover:bg-white/5 hover:text-white"
-          >
-            Catalogue
-          </a>
-          <a
-            href="#convertisseur"
-            className="rounded-lg border border-white/12 px-3 py-1.5 text-white/80 transition hover:bg-white/8 hover:text-white"
-          >
-            Convertir
-          </a>
-        </nav>
       </header>
 
-      <section className="mx-auto w-full max-w-5xl px-5 pb-12 pt-10 text-center sm:pt-16">
-        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs text-white/60">
-          <span className="relative flex size-1.5">
-            <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-70" />
-            <span className="relative inline-flex size-1.5 rounded-full bg-emerald-400" />
-          </span>
-          100 % côté client — rien ne transite par un serveur
-        </span>
-
-        <h1 className="mx-auto mt-6 max-w-3xl text-balance text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-6xl">
-          Convertissez <span className="text-gradient">n&apos;importe quel fichier</span>{" "}
-          sans jamais le téléverser
-        </h1>
-
-        <HeroStats />
-      </section>
-
-      <Workspace />
-
-      <section className="mx-auto w-full max-w-6xl px-5 py-24">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {FEATURES.map((feature) => (
-            <div key={feature.title} className="glass rounded-3xl p-6">
-              <span className="flex size-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.06] text-brand-400">
-                <feature.icon className="size-5" />
-              </span>
-              <h3 className="mt-4 text-base font-semibold text-white">
-                {feature.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/45">
-                {feature.body}
+      <main>
+        <section className="mx-auto w-full max-w-5xl px-6 pb-12 pt-14 sm:pt-20">
+          <div className="grid gap-x-12 gap-y-10 md:grid-cols-12">
+            <div className="md:col-span-8">
+              <h1 className="display text-[38px] sm:text-[52px]">
+                Vos fichiers ne quittent
+                <br />
+                pas <span className="italic">cet onglet.</span>
+              </h1>
+              <p className="mt-6 max-w-[34rem] text-[15.5px] leading-relaxed text-muted">
+                Documents, tableurs, images, audio, vidéo, archives, polices,
+                modèles 3D, code source. Tout est converti sur votre machine, par
+                votre navigateur, sans qu’un octet parte sur un serveur.
               </p>
             </div>
-          ))}
-        </div>
-      </section>
+            <div className="md:col-span-4 md:pt-3">
+              <Figures />
+            </div>
+          </div>
+        </section>
 
-      <Catalogue />
+        <Workspace />
 
-      <footer className="border-t border-white/6">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-5 py-10 text-xs text-white/35 sm:flex-row">
-          <p>
-            Convertisseur local — tout le traitement a lieu dans votre
-            navigateur.
-          </p>
-          <p className="flex items-center gap-1.5">
-            <ShieldCheck className="size-3.5 text-emerald-400/60" />
-            Aucune donnée collectée, aucun fichier stocké.
+        <section className="mx-auto w-full max-w-5xl px-6 pb-4">
+          <div className="grid gap-x-12 gap-y-8 border-t border-edge pt-8 md:grid-cols-3">
+            {NOTES.map((note) => (
+              <div key={note.kicker}>
+                <h2 className="label text-accent">{note.kicker}</h2>
+                <p className="mt-2.5 text-[13.5px] leading-relaxed text-muted">
+                  {note.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <Catalogue />
+      </main>
+
+      <footer className="border-t border-edge">
+        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-6 py-6">
+          <p className="label text-faint">Convertisseur local</p>
+          <p className="label text-faint">
+            Fonctionne hors ligne une fois la page chargée
           </p>
         </div>
       </footer>
-    </main>
+    </>
   );
 }
