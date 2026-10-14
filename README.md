@@ -30,6 +30,13 @@ s'exécute automatiquement.
 `Cross-Origin-Embedder-Policy: credentialless`, ce qui active `SharedArrayBuffer`
 tout en laissant les CDN publics accessibles.
 
+L'outil est privé : il ne doit pas apparaître dans les moteurs de recherche.
+Chaque réponse porte un en-tête `X-Robots-Tag: noindex, nofollow, noarchive`
+(posé dans `next.config.mjs`) et la page déclare la même règle en
+`<meta name="robots">`. Il n'y a volontairement pas de `robots.txt` qui
+bloquerait l'exploration : un robot qui ne peut pas lire la page ne voit pas
+le `noindex`, et Google peut alors indexer l'adresse seule.
+
 ## Ce que l'application sait convertir
 
 | Catégorie          | Conversions                                                                                                                                                                                        |

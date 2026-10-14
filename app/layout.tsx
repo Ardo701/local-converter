@@ -32,15 +32,14 @@ export const metadata: Metadata = {
   title: "Convertisseur local",
   description:
     "Convertir documents, tableurs, images, audio, vidéo, archives, polices, modèles 3D et code sans téléverser un seul fichier.",
-  keywords: [
-    "convertisseur",
-    "hors ligne",
-    "webassembly",
-    "ffmpeg",
-    "pdf",
-    "docx",
-    "confidentialité",
-  ],
+  // Kept out of search engines. next.config.mjs sends the same rule as an
+  // X-Robots-Tag header, which also covers the Wasm and worker files.
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
   openGraph: {
     title: "Convertisseur local",
     description:
