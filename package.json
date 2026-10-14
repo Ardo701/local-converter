@@ -1,6 +1,7 @@
 {
   "name": "local-converter",
   "version": "1.0.0",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "prebuild": "node scripts/prepare-assets.mjs",
