@@ -75,6 +75,12 @@ de document masque la page jusqu'à ce que React l'ait re-rendue, pour que le
 français ne s'affiche jamais une fraction de seconde. Sur téléphone, le lien
 « Catalogue » de l'en-tête disparaît pour laisser la place aux deux sélecteurs.
 
+Le logo `app/icon.svg` sert de favicon. Tout ce qui ne lit pas le SVG passe
+par des rendus bitmap de ce logo : `app/favicon.ico` (anciens Safari, aperçus
+de liens, tableau de bord Vercel), `app/apple-icon.png` pour l'écran d'accueil
+iOS et `public/icons/` pour Android via le manifeste (`app/manifest.ts`).
+Après une modification du logo, `npm run icons` les régénère.
+
 L'outil est construit comme un panneau à trois étapes numérotées (fichiers,
 format, réglages) plutôt que comme une page d'accueil marketing, et le
 catalogue est un vrai tableau trié par famille de formats.
@@ -89,7 +95,7 @@ lib/types.ts         le contrat `Converter`
 lib/registry.ts      catalogue et sélection des conversions applicables
 lib/converters/      une implémentation par famille de formats
 lib/ffmpeg.ts        chargement paresseux de ffmpeg-core + exécution d'une commande
-scripts/             préparation des binaires Wasm avant le build
+scripts/             binaires Wasm avant le build, icônes d'écran d'accueil
 ```
 
 Ajouter une conversion revient à écrire un objet `Converter` (identifiant,
