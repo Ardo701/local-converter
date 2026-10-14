@@ -1,3 +1,4 @@
+import { LocalizedError, type Localized } from "../i18n";
 import type { Converter, OutFile } from "../types";
 import {
   baseOf,
@@ -13,7 +14,7 @@ const RASTER_IN = ["jpg", "jpeg", "png", "webp", "bmp", "gif", "avif", "ico"];
 
 const QUALITY_OPTION = {
   id: "quality",
-  label: "Qualité",
+  label: { fr: "Qualité", en: "Quality" },
   type: "range" as const,
   default: 92,
   min: 40,
@@ -24,25 +25,25 @@ const QUALITY_OPTION = {
 
 const BACKGROUND_OPTION = {
   id: "background",
-  label: "Fond (zones transparentes)",
+  label: { fr: "Fond (zones transparentes)", en: "Background (transparent areas)" },
   type: "select" as const,
   default: "#ffffff",
   choices: [
-    { value: "#ffffff", label: "Blanc" },
-    { value: "#000000", label: "Noir" },
-    { value: "#18181b", label: "Gris sombre" },
+    { value: "#ffffff", label: { fr: "Blanc", en: "White" } },
+    { value: "#000000", label: { fr: "Noir", en: "Black" } },
+    { value: "#18181b", label: { fr: "Gris sombre", en: "Dark gray" } },
   ],
 };
 
 const SCALE_OPTION = {
   id: "scale",
-  label: "Échelle",
+  label: { fr: "Échelle", en: "Scale" },
   type: "select" as const,
   default: "1",
   choices: [
-    { value: "0.5", label: "0,5× (réduction)" },
-    { value: "1", label: "1× (taille d'origine)" },
-    { value: "2", label: "2× (haute définition)" },
+    { value: "0.5", label: { fr: "0,5× (réduction)", en: "0.5× (smaller)" } },
+    { value: "1", label: { fr: "1× (taille d'origine)", en: "1× (original size)" } },
+    { value: "2", label: { fr: "2× (haute définition)", en: "2× (high definition)" } },
     { value: "3", label: "3×" },
     { value: "4", label: "4×" },
   ],
@@ -78,7 +79,7 @@ async function decodeSvg(file: File, scale: number): Promise<Decoded> {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
       const el = new Image();
       el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("SVG illisible"));
+      el.onerror = () => reject(new LocalizedError({ fr: "SVG illisible", en: "Unreadable SVG" }));
       el.src = url;
     });
     return {
@@ -95,7 +96,7 @@ async function decodeTiff(file: File): Promise<Decoded> {
   const UTIF = await import("utif");
   const buffer = await file.arrayBuffer();
   const ifds = UTIF.decode(buffer);
-  if (!ifds.length) throw new Error("TIFF vide");
+  if (!ifds.length) throw new LocalizedError({ fr: "TIFF vide", en: "Empty TIFF" });
   UTIF.decodeImage(buffer, ifds[0]);
   const rgba = UTIF.toRGBA8(ifds[0]);
   const width = ifds[0].width;
@@ -153,7 +154,7 @@ const MIME: Record<string, string> = {
 function rasterConverter(
   from: string[],
   target: "png" | "jpg" | "webp",
-  description: string,
+  description: Localized,
   opts: { scale?: boolean } = {},
 ): Converter {
   const options = [
@@ -200,7 +201,12 @@ async function gifFrames(file: File) {
   const { parseGIF, decompressFrames } = await import("gifuct-js");
   const gif = parseGIF(await file.arrayBuffer());
   const frames = decompressFrames(gif, true);
-  if (!frames.length) throw new Error("Aucune image dans ce GIF");
+  if (!frames.length) {
+    throw new LocalizedError({
+      fr: "Aucune image dans ce GIF",
+      en: "No frames in this GIF",
+    });
+  }
   const width = gif.lsd.width;
   const height = gif.lsd.height;
 
@@ -241,15 +247,18 @@ async function gifFrames(file: File) {
 
 const gifToFrames: Converter = {
   id: "gif→frames",
-  to: "Séquence d'images",
+  to: { fr: "Séquence d'images", en: "Image sequence" },
   from: ["gif"],
   category: "images",
-  description: "Décompose un GIF animé en une image par frame.",
+  description: {
+    fr: "Décompose un GIF animé en une image par frame.",
+    en: "Splits an animated GIF into one image per frame.",
+  },
   multiOutput: true,
   options: [
     {
       id: "format",
-      label: "Format des frames",
+      label: { fr: "Format des frames", en: "Frame format" },
       type: "select",
       default: "png",
       choices: [
@@ -290,11 +299,14 @@ const gifToSprite: Converter = {
   to: "Sprite sheet",
   from: ["gif"],
   category: "images",
-  description: "Assemble toutes les frames dans une seule grande image PNG.",
+  description: {
+    fr: "Assemble toutes les frames dans une seule grande image PNG.",
+    en: "Packs every frame into one large PNG image.",
+  },
   options: [
     {
       id: "columns",
-      label: "Colonnes (0 = une seule ligne)",
+      label: { fr: "Colonnes (0 = une seule ligne)", en: "Columns (0 = single row)" },
       type: "number",
       default: 0,
       min: 0,
@@ -342,19 +354,28 @@ export const imageConverters: Converter[] = [
   rasterConverter(
     IMAGE_SOURCES,
     "png",
-    "Sans perte, transparence conservée. Le bon choix pour les captures et les logos.",
+    {
+      fr: "Sans perte, transparence conservée. Le bon choix pour les captures et les logos.",
+      en: "Lossless, transparency kept. The right choice for screenshots and logos.",
+    },
     { scale: true },
   ),
   rasterConverter(
     IMAGE_SOURCES,
     "jpg",
-    "Compression avec perte. Un fond opaque remplace les zones transparentes.",
+    {
+      fr: "Compression avec perte. Un fond opaque remplace les zones transparentes.",
+      en: "Lossy compression. An opaque background fills the transparent areas.",
+    },
     { scale: true },
   ),
   rasterConverter(
     IMAGE_SOURCES,
     "webp",
-    "Environ 30 % plus léger qu’un JPEG à qualité comparable, transparence comprise.",
+    {
+      fr: "Environ 30 % plus léger qu’un JPEG à qualité comparable, transparence comprise.",
+      en: "About 30% smaller than a JPEG at similar quality, transparency included.",
+    },
     { scale: true },
   ),
   gifToFrames,

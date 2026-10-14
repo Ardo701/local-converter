@@ -1,3 +1,5 @@
+import type { Localized } from "./i18n";
+
 export type Category =
   | "documents"
   | "data"
@@ -17,14 +19,15 @@ export type OutFile = {
 export type OptionDef =
   | {
       id: string;
-      label: string;
+      label: Localized;
       type: "select";
-      default: string;
-      choices: { value: string; label: string }[];
+      /** may differ per language, e.g. the spoken language for Whisper */
+      default: Localized;
+      choices: { value: string; label: Localized }[];
     }
   | {
       id: string;
-      label: string;
+      label: Localized;
       type: "number";
       default: number;
       min?: number;
@@ -34,7 +37,7 @@ export type OptionDef =
     }
   | {
       id: string;
-      label: string;
+      label: Localized;
       type: "range";
       default: number;
       min: number;
@@ -44,14 +47,14 @@ export type OptionDef =
     }
   | {
       id: string;
-      label: string;
+      label: Localized;
       type: "boolean";
       default: boolean;
     };
 
 export type ConvertContext = {
   /** 0 → 1 */
-  onProgress: (ratio: number, message?: string) => void;
+  onProgress: (ratio: number, message?: Localized) => void;
   options: Record<string, string | number | boolean>;
   signal?: AbortSignal;
 };
@@ -60,12 +63,12 @@ export type Converter = {
   /** unique id, e.g. "pdf→png" */
   id: string;
   /** target format shown in the UI */
-  to: string;
+  to: Localized;
   /** accepted source extensions, lowercase and without the dot */
   from: string[];
   category: Category;
   /** short human explanation */
-  description: string;
+  description: Localized;
   /** consumes every selected file at once instead of one by one */
   batch?: boolean;
   /** hidden unless at least this many files are selected */
@@ -78,16 +81,19 @@ export type Converter = {
   run: (files: File[], ctx: ConvertContext) => Promise<OutFile[]>;
 };
 
-export const CATEGORY_META: Record<Category, { label: string; code: string }> = {
+export const CATEGORY_META: Record<Category, { label: Localized; code: string }> = {
   documents: { label: "Documents", code: "DOC" },
-  data: { label: "Tableurs et données", code: "DAT" },
+  data: {
+    label: { fr: "Tableurs et données", en: "Spreadsheets and data" },
+    code: "DAT",
+  },
   images: { label: "Images", code: "IMG" },
   audio: { label: "Audio", code: "AUD" },
-  video: { label: "Vidéo", code: "VID" },
+  video: { label: { fr: "Vidéo", en: "Video" }, code: "VID" },
   archives: { label: "Archives", code: "ARC" },
-  fonts: { label: "Polices", code: "FNT" },
-  "3d": { label: "Modèles 3D", code: "3D" },
-  code: { label: "Code source", code: "SRC" },
+  fonts: { label: { fr: "Polices", en: "Fonts" }, code: "FNT" },
+  "3d": { label: { fr: "Modèles 3D", en: "3D models" }, code: "3D" },
+  code: { label: { fr: "Code source", en: "Source code" }, code: "SRC" },
 };
 
 /** Display order for the catalogue and the format list. */

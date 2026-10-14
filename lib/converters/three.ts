@@ -1,3 +1,4 @@
+import { LocalizedError } from "../i18n";
 import type { Converter, OutFile } from "../types";
 import { baseOf, textBlob } from "../utils";
 
@@ -52,16 +53,19 @@ async function sceneOf(file: File) {
   const name = file.name.toLowerCase();
   if (name.endsWith(".obj")) return loadObjScene(await file.text());
   if (name.endsWith(".stl")) return loadStlScene(await file.arrayBuffer());
-  throw new Error("Format 3D non supporté.");
+  throw new LocalizedError({ fr: "Format 3D non supporté.", en: "Unsupported 3D format." });
 }
 
 export const threeConverters: Converter[] = [
   {
     id: "3d→glb",
-    to: "GLB (glTF binaire)",
+    to: { fr: "GLB (glTF binaire)", en: "GLB (binary glTF)" },
     from: ["obj", "stl"],
     category: "3d",
-    description: "Le format 3D du web : géométrie et matériaux dans un seul fichier.",
+    description: {
+      fr: "Le format 3D du web : géométrie et matériaux dans un seul fichier.",
+      en: "The web’s 3D format: geometry and materials in a single file.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.glb`,
@@ -74,7 +78,10 @@ export const threeConverters: Converter[] = [
     to: "glTF (JSON)",
     from: ["obj", "stl"],
     category: "3d",
-    description: "Version JSON lisible du glTF, pratique pour l'inspection.",
+    description: {
+      fr: "Version JSON lisible du glTF, pratique pour l'inspection.",
+      en: "Readable JSON flavor of glTF, handy for inspection.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.gltf`,
@@ -84,10 +91,13 @@ export const threeConverters: Converter[] = [
   },
   {
     id: "gltf→glb",
-    to: "GLB (glTF binaire)",
+    to: { fr: "GLB (glTF binaire)", en: "GLB (binary glTF)" },
     from: ["gltf"],
     category: "3d",
-    description: "Compacte un glTF JSON (et ses buffers embarqués) en un seul GLB.",
+    description: {
+      fr: "Compacte un glTF JSON (et ses buffers embarqués) en un seul GLB.",
+      en: "Packs a JSON glTF (and its embedded buffers) into a single GLB.",
+    },
     run: each(async (file) => {
       const { GLTFLoader } = await import(
         "three/examples/jsm/loaders/GLTFLoader.js"

@@ -1,4 +1,5 @@
 import type { Category, Converter } from "./types";
+import type { Localized } from "./i18n";
 import { extOf } from "./utils";
 import { documentConverters } from "./converters/documents";
 import { dataConverters } from "./converters/data";
@@ -60,8 +61,10 @@ export function convertersByCategory(): Record<Category, Converter[]> {
 }
 
 /** Source formats a converter accepts, formatted for the catalogue. */
-export function sourceLabel(converter: Converter): string {
-  if (converter.from.includes("*")) return "N'importe quel fichier";
+export function sourceLabel(converter: Converter): Localized {
+  if (converter.from.includes("*")) {
+    return { fr: "N'importe quel fichier", en: "Any file" };
+  }
   const shown = converter.from.slice(0, 6).map((e) => e.toUpperCase());
   const extra = converter.from.length - shown.length;
   return shown.join(", ") + (extra > 0 ? ` +${extra}` : "");

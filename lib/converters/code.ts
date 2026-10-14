@@ -20,25 +20,25 @@ function each(
 
 const STYLE_OPTION = {
   id: "style",
-  label: "Sortie",
+  label: { fr: "Sortie", en: "Output" },
   type: "select" as const,
   default: "expanded",
   choices: [
-    { value: "expanded", label: "Lisible (expanded)" },
-    { value: "compressed", label: "Minifiée (compressed)" },
+    { value: "expanded", label: { fr: "Lisible (expanded)", en: "Readable (expanded)" } },
+    { value: "compressed", label: { fr: "Minifiée (compressed)", en: "Minified (compressed)" } },
   ],
 };
 
 const TARGET_OPTION = {
   id: "target",
-  label: "Cible JavaScript",
+  label: { fr: "Cible JavaScript", en: "JavaScript target" },
   type: "select" as const,
   default: "ES2020",
   choices: [
     { value: "ESNext", label: "ESNext" },
-    { value: "ES2020", label: "ES2020 — recommandé" },
+    { value: "ES2020", label: { fr: "ES2020 — recommandé", en: "ES2020 — recommended" } },
     { value: "ES2017", label: "ES2017" },
-    { value: "ES5", label: "ES5 (navigateurs anciens)" },
+    { value: "ES5", label: { fr: "ES5 (navigateurs anciens)", en: "ES5 (older browsers)" } },
   ],
 };
 
@@ -68,7 +68,10 @@ export const codeConverters: Converter[] = [
     to: "CSS",
     from: ["scss", "sass"],
     category: "code",
-    description: "Compilation Dart Sass complète, exécutée dans le navigateur.",
+    description: {
+      fr: "Compilation Dart Sass complète, exécutée dans le navigateur.",
+      en: "Full Dart Sass compilation, run in the browser.",
+    },
     options: [STYLE_OPTION],
     run: each(async (file, ctx) => {
       const sass = await import("sass");
@@ -89,11 +92,14 @@ export const codeConverters: Converter[] = [
     to: "CSS",
     from: ["less"],
     category: "code",
-    description: "Compilateur Less officiel, en local.",
+    description: {
+      fr: "Compilateur Less officiel, en local.",
+      en: "The official Less compiler, running locally.",
+    },
     options: [
       {
         id: "compress",
-        label: "Minifier la sortie",
+        label: { fr: "Minifier la sortie", en: "Minify output" },
         type: "boolean",
         default: false,
       },
@@ -114,7 +120,10 @@ export const codeConverters: Converter[] = [
     to: "JavaScript",
     from: ["ts", "mts", "cts"],
     category: "code",
-    description: "Retire les types via le compilateur TypeScript officiel.",
+    description: {
+      fr: "Retire les types via le compilateur TypeScript officiel.",
+      en: "Strips types with the official TypeScript compiler.",
+    },
     options: [TARGET_OPTION],
     run: each(async (file, ctx) => [
       {
@@ -136,8 +145,10 @@ export const codeConverters: Converter[] = [
     to: "JavaScript",
     from: ["tsx", "jsx"],
     category: "code",
-    description:
-      "Transpile le JSX/TSX vers du JavaScript avec la nouvelle transformation React.",
+    description: {
+      fr: "Transpile le JSX/TSX vers du JavaScript avec la nouvelle transformation React.",
+      en: "Transpiles JSX/TSX to JavaScript with the new React JSX transform.",
+    },
     options: [TARGET_OPTION],
     run: each(async (file, ctx) => [
       {

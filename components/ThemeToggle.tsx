@@ -1,13 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { Localized } from "@/lib/i18n";
+import { useLocale } from "./LocaleProvider";
 
 type Mode = "system" | "light" | "dark";
 
-const MODES: { id: Mode; label: string; title: string }[] = [
-  { id: "system", label: "Auto", title: "Suivre le réglage du système" },
-  { id: "light", label: "Clair", title: "Forcer le mode clair" },
-  { id: "dark", label: "Sombre", title: "Forcer le mode sombre" },
+const MODES: { id: Mode; label: Localized; title: Localized }[] = [
+  {
+    id: "system",
+    label: "Auto",
+    title: { fr: "Suivre le réglage du système", en: "Follow the system setting" },
+  },
+  {
+    id: "light",
+    label: { fr: "Clair", en: "Light" },
+    title: { fr: "Forcer le mode clair", en: "Force light mode" },
+  },
+  {
+    id: "dark",
+    label: { fr: "Sombre", en: "Dark" },
+    title: { fr: "Forcer le mode sombre", en: "Force dark mode" },
+  },
 ];
 
 /* Kept in sync with --color-paper in globals.css: the colour the browser
@@ -50,6 +64,7 @@ function writeBarColour(mode: Mode) {
 }
 
 export default function ThemeToggle() {
+  const { t } = useLocale();
   const [mode, setMode] = useState<Mode>("system");
   const [ready, setReady] = useState(false);
 
@@ -81,7 +96,7 @@ export default function ThemeToggle() {
   return (
     <div
       role="radiogroup"
-      aria-label="Thème"
+      aria-label={t({ fr: "Thème", en: "Theme" })}
       className="theme-switch flex items-stretch overflow-hidden rounded-[3px] border border-edge"
     >
       {MODES.map((option, index) => (
@@ -91,13 +106,13 @@ export default function ThemeToggle() {
           role="radio"
           data-mode={option.id}
           aria-checked={mode === option.id}
-          title={option.title}
+          title={t(option.title)}
           onClick={() => choose(option.id)}
           className={`label px-1.5 py-1 text-muted sm:px-2 transition-colors hover:text-ink ${
             index > 0 ? "border-l border-edge" : ""
           }`}
         >
-          {option.label}
+          {t(option.label)}
         </button>
       ))}
     </div>

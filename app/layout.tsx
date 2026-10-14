@@ -4,6 +4,8 @@ import {
   IBM_Plex_Sans,
   Instrument_Serif,
 } from "next/font/google";
+import { LocaleProvider } from "@/components/LocaleProvider";
+import { DEFAULT_LOCALE, LOCALE_KEY, LOCALES } from "@/lib/i18n";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -28,8 +30,8 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
+// The <title> is rendered by LocaleProvider so it follows the chosen language.
 export const metadata: Metadata = {
-  title: "Convertisseur local",
   description:
     "Convertir documents, tableurs, images, audio, vidéo, archives, polices, modèles 3D et code sans téléverser un seul fichier.",
   // Kept out of search engines. next.config.mjs sends the same rule as an
@@ -59,6 +61,12 @@ export const viewport: Viewport = {
 // the other theme. Without a stored choice the CSS media query decides.
 const APPLY_STORED_THEME = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
 
+// The server always renders French. When another language is stored, the page
+// stays hidden (see globals.css) until LocaleProvider has re-rendered it, so
+// the French text never flashes. The timeout is a safety net if the scripts
+// fail to load.
+const APPLY_STORED_LOCALE = `try{var l=localStorage.getItem(${JSON.stringify(LOCALE_KEY)});if(l!==${JSON.stringify(DEFAULT_LOCALE)}&&${JSON.stringify(LOCALES)}.indexOf(l)>-1){var r=document.documentElement;r.lang=l;r.dataset.langPending="";setTimeout(function(){delete r.dataset.langPending},3000)}}catch(e){}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -70,8 +78,11 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: APPLY_STORED_THEME }} />
+        <script dangerouslySetInnerHTML={{ __html: APPLY_STORED_LOCALE }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <LocaleProvider>{children}</LocaleProvider>
+      </body>
     </html>
   );
 }

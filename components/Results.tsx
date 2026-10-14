@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { OutFile } from "@/lib/types";
 import { download, downloadAllAsZip, humanSize } from "@/lib/utils";
+import { useLocale } from "./LocaleProvider";
 
 type Props = {
   results: OutFile[];
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function Results({ results, onReset }: Props) {
+  const { locale, t } = useLocale();
   const [zipping, setZipping] = useState(false);
   const total = results.reduce((sum, file) => sum + file.blob.size, 0);
 
@@ -17,8 +19,11 @@ export default function Results({ results, onReset }: Props) {
     <div className="border-t border-edge">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-rule bg-sunk px-5 py-2.5">
         <h2 className="label text-accent">
-          Résultat — {results.length} fichier{results.length > 1 ? "s" : ""},{" "}
-          <span className="nums">{humanSize(total)}</span>
+          {t({
+            fr: `Résultat — ${results.length} fichier${results.length > 1 ? "s" : ""},`,
+            en: `Result — ${results.length} file${results.length === 1 ? "" : "s"},`,
+          })}{" "}
+          <span className="nums">{humanSize(total, locale)}</span>
         </h2>
         <div className="flex items-baseline gap-5 text-[12.5px]">
           {results.length > 1 && (
@@ -35,7 +40,9 @@ export default function Results({ results, onReset }: Props) {
               }}
               className="text-accent underline underline-offset-[3px] disabled:opacity-50"
             >
-              {zipping ? "Compression…" : "Tout récupérer (.zip)"}
+              {zipping
+                ? t({ fr: "Compression…", en: "Compressing…" })
+                : t({ fr: "Tout récupérer (.zip)", en: "Download all (.zip)" })}
             </button>
           )}
           <button
@@ -43,7 +50,7 @@ export default function Results({ results, onReset }: Props) {
             onClick={onReset}
             className="text-muted underline underline-offset-[3px] hover:text-ink"
           >
-            Recommencer
+            {t({ fr: "Recommencer", en: "Start over" })}
           </button>
         </div>
       </div>
@@ -61,14 +68,14 @@ export default function Results({ results, onReset }: Props) {
               {file.name}
             </span>
             <span className="nums shrink-0 font-mono text-[11.5px] text-faint">
-              {humanSize(file.blob.size)}
+              {humanSize(file.blob.size, locale)}
             </span>
             <button
               type="button"
               onClick={() => download(file.blob, file.name)}
               className="shrink-0 text-[12.5px] text-accent underline underline-offset-[3px]"
             >
-              Télécharger
+              {t({ fr: "Télécharger", en: "Download" })}
             </button>
           </li>
         ))}

@@ -68,6 +68,13 @@ premier rendu, et le segment actif de la bascule est stylé à partir de cet att
 plutôt qu'à partir d'un état React, pour qu'aucune image ne s'affiche dans le
 mauvais thème pendant l'hydratation.
 
+L'interface existe en français et en anglais. Le sélecteur `FR · EN` de
+l'en-tête retient le choix dans `localStorage` (clé `lang`). Le serveur rend
+toujours la page en français : quand l'anglais est mémorisé, un script en tête
+de document masque la page jusqu'à ce que React l'ait re-rendue, pour que le
+français ne s'affiche jamais une fraction de seconde. Sur téléphone, le lien
+« Catalogue » de l'en-tête disparaît pour laisser la place aux deux sélecteurs.
+
 L'outil est construit comme un panneau à trois étapes numérotées (fichiers,
 format, réglages) plutôt que comme une page d'accueil marketing, et le
 catalogue est un vrai tableau trié par famille de formats.
@@ -77,6 +84,7 @@ catalogue est un vrai tableau trié par famille de formats.
 ```
 app/                 page unique (App Router) + styles globaux
 components/          interface : dépôt de fichiers, choix du format, réglages, résultats
+lib/i18n.ts          langues, type `Localized` et `LocalizedError`
 lib/types.ts         le contrat `Converter`
 lib/registry.ts      catalogue et sélection des conversions applicables
 lib/converters/      une implémentation par famille de formats
@@ -87,6 +95,13 @@ scripts/             préparation des binaires Wasm avant le build
 Ajouter une conversion revient à écrire un objet `Converter` (identifiant,
 formats d'entrée, format de sortie, réglages, fonction `run`) et à l'ajouter au
 tableau de `lib/registry.ts`. L'interface s'adapte toute seule.
+
+Tout texte affiché est un `Localized` : soit une chaîne identique dans les deux
+langues (`"PNG"`), soit un objet `{ fr, en }`. Les convertisseurs ne
+connaissent pas la langue choisie ; ils lèvent des `LocalizedError` et
+signalent leur progression avec des `Localized`, que l'interface traduit à
+l'affichage. Un message d'erreur change donc de langue si on bascule après
+l'échec.
 
 Toutes les bibliothèques lourdes (FFmpeg, pdf.js, SheetJS, Whisper, three.js,
 Dart Sass, TypeScript…) sont chargées par `import()` dynamique : la page

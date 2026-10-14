@@ -1,3 +1,4 @@
+import { LocalizedError, type Localized } from "../i18n";
 import type { Converter, OutFile } from "../types";
 import { baseOf, extOf, textBlob } from "../utils";
 import { runFFmpeg } from "../ffmpeg";
@@ -9,7 +10,7 @@ let transcriberCache: { key: string; instance: unknown } | null = null;
 
 async function getTranscriber(
   model: string,
-  onProgress: (ratio: number, message?: string) => void,
+  onProgress: (ratio: number, message?: Localized) => void,
 ) {
   if (transcriberCache?.key === model) return transcriberCache.instance as never;
   const { pipeline, env } = await import("@huggingface/transformers");
@@ -26,7 +27,10 @@ async function getTranscriber(
         if (info.status === "progress" && typeof info.progress === "number") {
           onProgress(
             0.05 + (info.progress / 100) * 0.35,
-            "Téléchargement du modèle de transcription…",
+            {
+              fr: "Téléchargement du modèle de transcription…",
+              en: "Downloading the transcription model…",
+            },
           );
         }
       },
@@ -45,7 +49,7 @@ async function getTranscriber(
 /** Decodes any media file into the 16 kHz mono Float32 signal Whisper expects. */
 async function toMonoPcm(
   file: File,
-  onProgress: (ratio: number, message?: string) => void,
+  onProgress: (ratio: number, message?: Localized) => void,
 ): Promise<Float32Array> {
   let buffer = await file.arrayBuffer();
   const ext = extOf(file.name);
@@ -78,7 +82,10 @@ async function toMonoPcm(
     }
   }
 
-  onProgress(0.42, "Extraction de la piste audio…");
+  onProgress(0.42, {
+    fr: "Extraction de la piste audio…",
+    en: "Extracting the audio track…",
+  });
   const input = `speech-input.${ext || "bin"}`;
   const results = await runFFmpeg({
     inputs: [{ name: input, data: new Uint8Array(buffer) }],
@@ -131,46 +138,58 @@ function toVtt(chunks: Chunk[]): string {
 
 const MODEL_OPTION = {
   id: "model",
-  label: "Modèle Whisper",
+  label: { fr: "Modèle Whisper", en: "Whisper model" },
   type: "select" as const,
   default: "onnx-community/whisper-base",
   choices: [
-    { value: "onnx-community/whisper-tiny", label: "Tiny — rapide (~50 Mo)" },
+    { value: "onnx-community/whisper-tiny", label: { fr: "Tiny — rapide (~50 Mo)", en: "Tiny — fast (~50 MB)" } },
     {
       value: "onnx-community/whisper-base",
-      label: "Base — équilibré (~80 Mo)",
+      label: { fr: "Base — équilibré (~80 Mo)", en: "Base — balanced (~80 MB)" },
     },
-    { value: "onnx-community/whisper-small", label: "Small — précis (~250 Mo)" },
+    {
+      value: "onnx-community/whisper-small",
+      label: { fr: "Small — précis (~250 Mo)", en: "Small — accurate (~250 MB)" },
+    },
   ],
 };
 
 const LANGUAGE_OPTION = {
   id: "language",
-  label: "Langue parlée",
+  label: { fr: "Langue parlée", en: "Spoken language" },
   type: "select" as const,
-  default: "french",
+  default: { fr: "french", en: "english" },
   choices: [
-    { value: "french", label: "Français" },
-    { value: "english", label: "Anglais" },
-    { value: "spanish", label: "Espagnol" },
-    { value: "german", label: "Allemand" },
-    { value: "italian", label: "Italien" },
-    { value: "portuguese", label: "Portugais" },
-    { value: "dutch", label: "Néerlandais" },
-    { value: "auto", label: "Détection automatique" },
+    { value: "french", label: { fr: "Français", en: "French" } },
+    { value: "english", label: { fr: "Anglais", en: "English" } },
+    { value: "spanish", label: { fr: "Espagnol", en: "Spanish" } },
+    { value: "german", label: { fr: "Allemand", en: "German" } },
+    { value: "italian", label: { fr: "Italien", en: "Italian" } },
+    { value: "portuguese", label: { fr: "Portugais", en: "Portuguese" } },
+    { value: "dutch", label: { fr: "Néerlandais", en: "Dutch" } },
+    { value: "auto", label: { fr: "Détection automatique", en: "Auto-detect" } },
   ],
 };
 
 function transcriptionConverter(format: "txt" | "srt" | "vtt"): Converter {
   const labels = {
-    txt: "Texte (.txt)",
-    srt: "Sous-titres (.srt)",
-    vtt: "Sous-titres (.vtt)",
+    txt: { fr: "Texte (.txt)", en: "Text (.txt)" },
+    srt: { fr: "Sous-titres (.srt)", en: "Subtitles (.srt)" },
+    vtt: { fr: "Sous-titres (.vtt)", en: "Subtitles (.vtt)" },
   };
   const notes = {
-    txt: "Transcription par Whisper. Le texte seul, sans horodatage.",
-    srt: "Transcription horodatée au format SubRip, pour un lecteur vidéo.",
-    vtt: "Transcription horodatée au format WebVTT, pour la balise <track>.",
+    txt: {
+      fr: "Transcription par Whisper. Le texte seul, sans horodatage.",
+      en: "Whisper transcription. Just the text, no timestamps.",
+    },
+    srt: {
+      fr: "Transcription horodatée au format SubRip, pour un lecteur vidéo.",
+      en: "Timestamped transcription in SubRip format, for a video player.",
+    },
+    vtt: {
+      fr: "Transcription horodatée au format WebVTT, pour la balise <track>.",
+      en: "Timestamped transcription in WebVTT format, for the <track> tag.",
+    },
   };
   return {
     id: `speech→${format}`,
@@ -187,12 +206,12 @@ function transcriptionConverter(format: "txt" | "srt" | "vtt"): Converter {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const share = 1 / files.length;
-        const report = (r: number, m?: string) =>
+        const report = (r: number, m?: Localized) =>
           ctx.onProgress(i * share + r * share, m);
 
         const transcriber = await getTranscriber(model, report);
         const audio = await toMonoPcm(file, report);
-        report(0.55, "Transcription en cours…");
+        report(0.55, { fr: "Transcription en cours…", en: "Transcribing…" });
 
         const result = (await (
           transcriber as (
@@ -214,7 +233,12 @@ function transcriptionConverter(format: "txt" | "srt" | "vtt"): Converter {
               ? toSrt(chunks)
               : toVtt(chunks);
 
-        if (!content.trim()) throw new Error("Aucune parole détectée.");
+        if (!content.trim()) {
+          throw new LocalizedError({
+            fr: "Aucune parole détectée.",
+            en: "No speech detected.",
+          });
+        }
         out.push({
           name: `${baseOf(file.name)}.${format}`,
           blob: textBlob(

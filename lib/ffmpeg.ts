@@ -1,4 +1,5 @@
 import type { FFmpeg } from "@ffmpeg/ffmpeg";
+import { LocalizedError, type Locale, type Localized } from "./i18n";
 
 /** Served from our own origin — copied into public/ffmpeg at build time. */
 const CORE_BASE = "/ffmpeg";
@@ -6,7 +7,7 @@ const CORE_BASE = "/ffmpeg";
 let instance: FFmpeg | null = null;
 let loading: Promise<FFmpeg> | null = null;
 
-export type FFmpegLoadProgress = (ratio: number, message: string) => void;
+export type FFmpegLoadProgress = (ratio: number, message: Localized) => void;
 
 /**
  * Loads the single-threaded ffmpeg-core (~32 Mo) once per tab. Everything is
@@ -19,16 +20,22 @@ export async function getFFmpeg(onProgress?: FFmpegLoadProgress): Promise<FFmpeg
       const { FFmpeg } = await import("@ffmpeg/ffmpeg");
       const { toBlobURL } = await import("@ffmpeg/util");
       const ffmpeg = new FFmpeg();
-      onProgress?.(0.02, "Chargement du moteur FFmpeg (~32 Mo, une seule fois)…");
+      onProgress?.(0.02, {
+        fr: "Chargement du moteur FFmpeg (~32 Mo, une seule fois)…",
+        en: "Loading the FFmpeg engine (~32 MB, only once)…",
+      });
       const coreURL = await toBlobURL(`${CORE_BASE}/ffmpeg-core.js`, "text/javascript");
-      onProgress?.(0.25, "Chargement du moteur FFmpeg…");
+      onProgress?.(0.25, {
+        fr: "Chargement du moteur FFmpeg…",
+        en: "Loading the FFmpeg engine…",
+      });
       const wasmURL = await toBlobURL(
         `${CORE_BASE}/ffmpeg-core.wasm`,
         "application/wasm",
       );
-      onProgress?.(0.9, "Initialisation de FFmpeg…");
+      onProgress?.(0.9, { fr: "Initialisation de FFmpeg…", en: "Starting FFmpeg…" });
       await ffmpeg.load({ coreURL, wasmURL });
-      onProgress?.(1, "FFmpeg prêt");
+      onProgress?.(1, { fr: "FFmpeg prêt", en: "FFmpeg ready" });
       instance = ffmpeg;
       return ffmpeg;
     })().catch((error) => {
@@ -49,7 +56,7 @@ export type FFmpegRunOptions = {
   args: string[];
   /** exact output names, or a prefix match for numbered sequences */
   output: { name: string } | { prefix: string; extension: string };
-  onProgress?: (ratio: number, message?: string) => void;
+  onProgress?: (ratio: number, message?: Localized) => void;
   /** used to translate ffmpeg's progress into an overall ratio */
   progressRange?: [number, number];
 };
@@ -65,7 +72,10 @@ export async function runFFmpeg(opts: FFmpegRunOptions): Promise<FFmpegOutput[]>
 
   const handler = ({ progress }: { progress: number }) => {
     const clamped = Math.min(1, Math.max(0, progress));
-    opts.onProgress?.(from + (to - from) * clamped, "Encodage…");
+    opts.onProgress?.(from + (to - from) * clamped, {
+      fr: "Encodage…",
+      en: "Encoding…",
+    });
   };
   ffmpeg.on("progress", handler);
 
@@ -86,7 +96,7 @@ export async function runFFmpeg(opts: FFmpegRunOptions): Promise<FFmpegOutput[]>
       written.push(input.name);
     }
     const code = await ffmpeg.exec(opts.args);
-    if (code !== 0) throw new Error(explainFailure(log));
+    if (code !== 0) throw new LocalizedError(explainFailure(log));
 
     const results: FFmpegOutput[] = [];
     if ("name" in opts.output) {
@@ -105,7 +115,12 @@ export async function runFFmpeg(opts: FFmpegRunOptions): Promise<FFmpegOutput[]>
         )
         .map((e) => e.name)
         .sort();
-      if (!produced.length) throw new Error("FFmpeg n'a produit aucun fichier.");
+      if (!produced.length) {
+        throw new LocalizedError({
+          fr: "FFmpeg n'a produit aucun fichier.",
+          en: "FFmpeg produced no file.",
+        });
+      }
       for (const name of produced) {
         results.push({ name, data: (await ffmpeg.readFile(name)) as Uint8Array });
         written.push(name);
@@ -126,24 +141,42 @@ export async function runFFmpeg(opts: FFmpegRunOptions): Promise<FFmpegOutput[]>
 }
 
 /** Turns the ffmpeg log tail into an actionable message. */
-function explainFailure(log: string[]): string {
+function explainFailure(log: string[]): Record<Locale, string> {
   const text = log.join("\n");
   if (/does not contain any stream/i.test(text)) {
-    return "Ce fichier ne contient pas la piste demandée — une vidéo sans son, par exemple.";
+    return {
+      fr: "Ce fichier ne contient pas la piste demandée — une vidéo sans son, par exemple.",
+      en: "This file doesn't contain the requested track — a video with no sound, for example.",
+    };
   }
   if (/Invalid data found when processing input|moov atom not found/i.test(text)) {
-    return "Le fichier semble corrompu ou tronqué : FFmpeg ne parvient pas à le lire.";
+    return {
+      fr: "Le fichier semble corrompu ou tronqué : FFmpeg ne parvient pas à le lire.",
+      en: "The file looks corrupted or truncated: FFmpeg can't read it.",
+    };
   }
   if (/Decoder \(codec .*\) not found|Unknown encoder/i.test(text)) {
-    return "Ce codec n'est pas inclus dans la version WebAssembly de FFmpeg.";
+    return {
+      fr: "Ce codec n'est pas inclus dans la version WebAssembly de FFmpeg.",
+      en: "This codec isn't included in the WebAssembly build of FFmpeg.",
+    };
   }
   if (/Output file is empty|No such file or directory/i.test(text)) {
-    return "FFmpeg n'a produit aucune image : le média est peut-être trop court pour ces réglages.";
+    return {
+      fr: "FFmpeg n'a produit aucune image : le média est peut-être trop court pour ces réglages.",
+      en: "FFmpeg produced no image: the media may be too short for these settings.",
+    };
   }
   const lastError = [...log].reverse().find((line) => /error|invalid|failed/i.test(line));
   return lastError
-    ? `FFmpeg a échoué : ${lastError.trim()}`
-    : "FFmpeg n'a pas pu traiter ce fichier (codec ou conteneur non supporté).";
+    ? {
+        fr: `FFmpeg a échoué : ${lastError.trim()}`,
+        en: `FFmpeg failed: ${lastError.trim()}`,
+      }
+    : {
+        fr: "FFmpeg n'a pas pu traiter ce fichier (codec ou conteneur non supporté).",
+        en: "FFmpeg couldn't process this file (unsupported codec or container).",
+      };
 }
 
 export { bytesBlob as toBlob } from "./utils";

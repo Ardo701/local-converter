@@ -1,6 +1,7 @@
 "use client";
 
 import type { OptionDef } from "@/lib/types";
+import { useLocale } from "./LocaleProvider";
 
 type Props = {
   options: OptionDef[];
@@ -15,19 +16,22 @@ export default function OptionsPanel({
   onChange,
   disabled,
 }: Props) {
+  const { t } = useLocale();
   if (!options.length) return null;
 
   return (
     <div className="grid gap-x-10 gap-y-5 px-5 py-5 sm:grid-cols-2">
       {options.map((option) => {
-        const value = values[option.id] ?? option.default;
+        const value =
+          values[option.id] ??
+          (option.type === "select" ? t(option.default) : option.default);
         return (
           <div key={option.id}>
             <label
               htmlFor={`opt-${option.id}`}
               className="label flex items-baseline justify-between text-faint"
             >
-              <span>{option.label}</span>
+              <span>{t(option.label)}</span>
               {option.type === "range" && (
                 <span className="nums text-ink">
                   {value}
@@ -48,7 +52,7 @@ export default function OptionsPanel({
                   >
                     {option.choices.map((choice) => (
                       <option key={choice.value} value={choice.value}>
-                        {choice.label}
+                        {t(choice.label)}
                       </option>
                     ))}
                   </select>
@@ -122,7 +126,9 @@ export default function OptionsPanel({
                       </svg>
                     )}
                   </span>
-                  {value ? "Activé" : "Désactivé"}
+                  {value
+                    ? t({ fr: "Activé", en: "On" })
+                    : t({ fr: "Désactivé", en: "Off" })}
                 </button>
               )}
             </div>

@@ -2,6 +2,7 @@
 
 import type { Category, Converter } from "@/lib/types";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/types";
+import { useLocale } from "./LocaleProvider";
 
 type Props = {
   converters: Converter[];
@@ -16,11 +17,14 @@ export default function TargetPicker({
   onSelect,
   disabled,
 }: Props) {
+  const { t } = useLocale();
   if (!converters.length) {
     return (
       <p className="px-5 py-8 text-center text-[13.5px] text-muted">
-        Rien ne couvre cette combinaison de fichiers. Retirez-en, ou n’en gardez
-        que d’un même type.
+        {t({
+          fr: "Rien ne couvre cette combinaison de fichiers. Retirez-en, ou n’en gardez que d’un même type.",
+          en: "Nothing covers this mix of files. Remove some, or keep only one type.",
+        })}
       </p>
     );
   }
@@ -34,11 +38,14 @@ export default function TargetPicker({
   );
 
   return (
-    <div role="radiogroup" aria-label="Format de sortie">
+    <div
+      role="radiogroup"
+      aria-label={t({ fr: "Format de sortie", en: "Output format" })}
+    >
       {CATEGORY_ORDER.filter((category) => grouped[category]).map((category) => (
         <section key={category}>
           <h3 className="label border-b border-rule bg-sunk px-5 py-1.5 text-faint">
-            {CATEGORY_META[category].label}
+            {t(CATEGORY_META[category].label)}
           </h3>
           {grouped[category]!.map((converter) => {
             const active = converter.id === selectedId;
@@ -67,10 +74,10 @@ export default function TargetPicker({
                     active ? "font-medium text-accent" : ""
                   }`}
                 >
-                  {converter.to}
+                  {t(converter.to)}
                 </span>
                 <span className="hidden flex-1 text-[13px] leading-snug text-muted sm:block">
-                  {converter.description}
+                  {t(converter.description)}
                 </span>
                 {converter.heavy && (
                   <span className="ml-auto shrink-0 font-mono text-[10px] uppercase tracking-wider text-faint">

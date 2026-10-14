@@ -1,3 +1,4 @@
+import { LocalizedError } from "../i18n";
 import type { Converter, OutFile } from "../types";
 import { baseOf, bytesBlob } from "../utils";
 
@@ -12,7 +13,10 @@ function readSfnt(data: Uint8Array) {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   const flavor = view.getUint32(0);
   if (flavor === 0x74746366) {
-    throw new Error("Les collections de polices (.ttc) ne sont pas supportées.");
+    throw new LocalizedError({
+      fr: "Les collections de polices (.ttc) ne sont pas supportées.",
+      en: "Font collections (.ttc) aren't supported.",
+    });
   }
   const numTables = view.getUint16(4);
   const tables: SfntTable[] = [];
@@ -93,7 +97,9 @@ async function ttfToWoff(data: Uint8Array): Promise<Uint8Array> {
 async function woffToTtf(data: Uint8Array): Promise<Uint8Array> {
   const { unzlibSync } = await import("fflate");
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
-  if (view.getUint32(0) !== 0x774f4646) throw new Error("Ce n'est pas un WOFF.");
+  if (view.getUint32(0) !== 0x774f4646) {
+    throw new LocalizedError({ fr: "Ce n'est pas un WOFF.", en: "This isn't a WOFF file." });
+  }
   const flavor = view.getUint32(4);
   const numTables = view.getUint16(12);
 
@@ -159,7 +165,12 @@ function loadScript(src: string): Promise<void> {
       script.src = src;
       script.async = true;
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error(`Chargement impossible : ${src}`));
+      script.onerror = () => reject(
+          new LocalizedError({
+            fr: `Chargement impossible : ${src}`,
+            en: `Couldn't load ${src}`,
+          }),
+        );
       document.head.appendChild(script);
     });
     scriptCache.set(src, pending);
@@ -176,7 +187,12 @@ async function wawoff(kind: "compress" | "decompress"): Promise<WawoffModule> {
   const scope = window as unknown as Record<string, WawoffModule | undefined>;
   if (!scope[key]) await loadScript(`/wawoff2/${kind}.js`);
   const wasmModule = scope[key];
-  if (!wasmModule) throw new Error("Moteur WOFF2 indisponible.");
+  if (!wasmModule) {
+    throw new LocalizedError({
+      fr: "Moteur WOFF2 indisponible.",
+      en: "WOFF2 engine unavailable.",
+    });
+  }
   if (!wasmModule.calledRun) {
     await new Promise<void>((resolve) => {
       const previous = wasmModule.onRuntimeInitialized;
@@ -193,14 +209,24 @@ async function wawoff(kind: "compress" | "decompress"): Promise<WawoffModule> {
 async function woff2Compress(data: Uint8Array): Promise<Uint8Array> {
   const { compress } = await wawoff("compress");
   const result = compress?.(data);
-  if (!result) throw new Error("Cette police n'a pas pu être compressée en WOFF2.");
+  if (!result) {
+    throw new LocalizedError({
+      fr: "Cette police n'a pas pu être compressée en WOFF2.",
+      en: "This font couldn't be compressed to WOFF2.",
+    });
+  }
   return result;
 }
 
 async function woff2Decompress(data: Uint8Array): Promise<Uint8Array> {
   const { decompress } = await wawoff("decompress");
   const result = decompress?.(data);
-  if (!result) throw new Error("Ce WOFF2 n'a pas pu être décompressé.");
+  if (!result) {
+    throw new LocalizedError({
+      fr: "Ce WOFF2 n'a pas pu être décompressé.",
+      en: "This WOFF2 couldn't be decompressed.",
+    });
+  }
   return result;
 }
 
@@ -226,7 +252,10 @@ export const fontConverters: Converter[] = [
     to: "WOFF",
     from: ["ttf", "otf"],
     category: "fonts",
-    description: "Emballe la police dans le conteneur WOFF 1.0 (zlib).",
+    description: {
+      fr: "Emballe la police dans le conteneur WOFF 1.0 (zlib).",
+      en: "Wraps the font in the WOFF 1.0 container (zlib).",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.woff`,
@@ -242,8 +271,10 @@ export const fontConverters: Converter[] = [
     to: "WOFF2",
     from: ["ttf", "otf"],
     category: "fonts",
-    description:
-      "Compression Brotli du format WOFF2 : jusqu'à 30 % plus léger qu'un WOFF.",
+    description: {
+      fr: "Compression Brotli du format WOFF2 : jusqu'à 30 % plus léger qu'un WOFF.",
+      en: "WOFF2’s Brotli compression: up to 30% smaller than a WOFF.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.woff2`,
@@ -259,7 +290,10 @@ export const fontConverters: Converter[] = [
     to: "TTF",
     from: ["woff"],
     category: "fonts",
-    description: "Décompresse un WOFF vers la police TrueType d'origine.",
+    description: {
+      fr: "Décompresse un WOFF vers la police TrueType d'origine.",
+      en: "Unpacks a WOFF back into the original TrueType font.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.ttf`,
@@ -275,7 +309,10 @@ export const fontConverters: Converter[] = [
     to: "TTF",
     from: ["woff2"],
     category: "fonts",
-    description: "Décompresse un WOFF2 vers la police TrueType d'origine.",
+    description: {
+      fr: "Décompresse un WOFF2 vers la police TrueType d'origine.",
+      en: "Unpacks a WOFF2 back into the original TrueType font.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.ttf`,
@@ -291,7 +328,10 @@ export const fontConverters: Converter[] = [
     to: "WOFF2",
     from: ["woff"],
     category: "fonts",
-    description: "Ré-encode un WOFF en WOFF2 (via la police TrueType interne).",
+    description: {
+      fr: "Ré-encode un WOFF en WOFF2 (via la police TrueType interne).",
+      en: "Re-encodes a WOFF as WOFF2 (through the inner TrueType font).",
+    },
     run: each(async (file) => {
       const ttf = await woffToTtf(new Uint8Array(await file.arrayBuffer()));
       return [

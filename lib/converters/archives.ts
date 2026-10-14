@@ -1,3 +1,4 @@
+import { LocalizedError } from "../i18n";
 import type { Converter, OutFile } from "../types";
 import { baseOf, bytesBlob, extOf } from "../utils";
 
@@ -129,7 +130,10 @@ export const archiveConverters: Converter[] = [
     from: ["*"],
     category: "archives",
     batch: true,
-    description: "Compresse tous les fichiers sélectionnés dans une archive ZIP.",
+    description: {
+      fr: "Compresse tous les fichiers sélectionnés dans une archive ZIP.",
+      en: "Compresses every selected file into a ZIP archive.",
+    },
     options: [
       {
         id: "level",
@@ -137,9 +141,9 @@ export const archiveConverters: Converter[] = [
         type: "select",
         default: "6",
         choices: [
-          { value: "9", label: "Maximale (lent)" },
-          { value: "6", label: "Équilibrée — recommandé" },
-          { value: "0", label: "Aucune (stockage brut)" },
+          { value: "9", label: { fr: "Maximale (lent)", en: "Maximum (slow)" } },
+          { value: "6", label: { fr: "Équilibrée — recommandé", en: "Balanced — recommended" } },
+          { value: "0", label: { fr: "Aucune (stockage brut)", en: "None (store only)" } },
         ],
       },
     ],
@@ -152,7 +156,7 @@ export const archiveConverters: Converter[] = [
         ctx.onProgress((i / files.length) * 0.8, files[i].name);
         payload[names[i]] = new Uint8Array(await files[i].arrayBuffer());
       }
-      ctx.onProgress(0.85, "Compression…");
+      ctx.onProgress(0.85, { fr: "Compression…", en: "Compressing…" });
       const zipped = zipSync(payload, { level });
       ctx.onProgress(1);
       return [
@@ -169,11 +173,14 @@ export const archiveConverters: Converter[] = [
     from: ["*"],
     category: "archives",
     batch: true,
-    description: "Regroupe les fichiers dans une archive TAR (non compressée).",
+    description: {
+      fr: "Regroupe les fichiers dans une archive TAR (non compressée).",
+      en: "Bundles the files into an (uncompressed) TAR archive.",
+    },
     options: [
       {
         id: "gzip",
-        label: "Compresser en .tar.gz",
+        label: { fr: "Compresser en .tar.gz", en: "Compress as .tar.gz" },
         type: "boolean",
         default: false,
       },
@@ -191,7 +198,7 @@ export const archiveConverters: Converter[] = [
       let data = createTar(entries);
       let name = "archive.tar";
       if (ctx.options.gzip) {
-        ctx.onProgress(0.85, "Compression gzip…");
+        ctx.onProgress(0.85, { fr: "Compression gzip…", en: "Compressing with gzip…" });
         const { gzipSync } = await import("fflate");
         data = gzipSync(data, { level: 6 });
         name = "archive.tar.gz";
@@ -207,11 +214,14 @@ export const archiveConverters: Converter[] = [
   },
   {
     id: "zip→files",
-    to: "Fichiers extraits",
+    to: { fr: "Fichiers extraits", en: "Extracted files" },
     from: ["zip"],
     category: "archives",
     multiOutput: true,
-    description: "Décompresse l'archive entièrement dans la mémoire du navigateur.",
+    description: {
+      fr: "Décompresse l'archive entièrement dans la mémoire du navigateur.",
+      en: "Unpacks the whole archive in the browser’s memory.",
+    },
     async run(files, ctx) {
       const { unzipSync } = await import("fflate");
       const out: OutFile[] = [];
@@ -227,18 +237,25 @@ export const archiveConverters: Converter[] = [
         }
       }
       ctx.onProgress(1);
-      if (!out.length) throw new Error("Archive vide ou illisible.");
+      if (!out.length) {
+        throw new LocalizedError({
+          fr: "Archive vide ou illisible.",
+          en: "Empty or unreadable archive.",
+        });
+      }
       return out;
     },
   },
   {
     id: "tar→files",
-    to: "Fichiers extraits",
+    to: { fr: "Fichiers extraits", en: "Extracted files" },
     from: ["tar", "gz", "tgz"],
     category: "archives",
     multiOutput: true,
-    description:
-      "Extrait un .tar, .tar.gz ou .tgz — un simple .gz est simplement décompressé.",
+    description: {
+      fr: "Extrait un .tar, .tar.gz ou .tgz — un simple .gz est simplement décompressé.",
+      en: "Extracts a .tar, .tar.gz or .tgz — a plain .gz is simply decompressed.",
+    },
     async run(files, ctx) {
       const { gunzipSync } = await import("fflate");
       const out: OutFile[] = [];
@@ -268,7 +285,12 @@ export const archiveConverters: Converter[] = [
         }
       }
       ctx.onProgress(1);
-      if (!out.length) throw new Error("Aucun fichier trouvé dans l'archive.");
+      if (!out.length) {
+        throw new LocalizedError({
+          fr: "Aucun fichier trouvé dans l'archive.",
+          en: "No files found in the archive.",
+        });
+      }
       return out;
     },
   },
@@ -277,7 +299,10 @@ export const archiveConverters: Converter[] = [
     to: "GZIP (.gz)",
     from: ["*"],
     category: "archives",
-    description: "Compresse chaque fichier individuellement en gzip.",
+    description: {
+      fr: "Compresse chaque fichier individuellement en gzip.",
+      en: "Gzips each file individually.",
+    },
     async run(files, ctx) {
       const { gzipSync } = await import("fflate");
       const out: OutFile[] = [];

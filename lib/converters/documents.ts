@@ -1,3 +1,4 @@
+import { LocalizedError } from "../i18n";
 import type { Converter, OutFile } from "../types";
 import {
   baseOf,
@@ -58,7 +59,7 @@ const PAGE_SIZES: Record<string, { width: number; height: number }> = {
 
 const PAGE_OPTION = {
   id: "page",
-  label: "Format de page",
+  label: { fr: "Format de page", en: "Page size" },
   type: "select" as const,
   default: "a4",
   choices: [
@@ -364,7 +365,10 @@ export const documentConverters: Converter[] = [
     to: "HTML",
     from: ["docx"],
     category: "documents",
-    description: "Extrait la structure du document Word en HTML propre.",
+    description: {
+      fr: "Extrait la structure du document Word en HTML propre.",
+      en: "Extracts the Word document's structure as clean HTML.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.html`,
@@ -380,7 +384,10 @@ export const documentConverters: Converter[] = [
     to: "Markdown",
     from: ["docx"],
     category: "documents",
-    description: "Word vers Markdown, en passant par le HTML intermédiaire.",
+    description: {
+      fr: "Word vers Markdown, en passant par le HTML intermédiaire.",
+      en: "Word to Markdown, by way of intermediate HTML.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.md`,
@@ -390,10 +397,13 @@ export const documentConverters: Converter[] = [
   },
   {
     id: "docx→txt",
-    to: "Texte brut",
+    to: { fr: "Texte brut", en: "Plain text" },
     from: ["docx"],
     category: "documents",
-    description: "Ne conserve que le texte du document Word.",
+    description: {
+      fr: "Ne conserve que le texte du document Word.",
+      en: "Keeps only the text of the Word document.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.txt`,
@@ -406,7 +416,10 @@ export const documentConverters: Converter[] = [
     to: "PDF",
     from: ["docx"],
     category: "documents",
-    description: "Rend le document Word puis l'imprime en PDF paginé.",
+    description: {
+      fr: "Rend le document Word puis l'imprime en PDF paginé.",
+      en: "Renders the Word document, then prints it to a paginated PDF.",
+    },
     options: [PAGE_OPTION],
     run: each(async (file, ctx) => [
       {
@@ -423,7 +436,10 @@ export const documentConverters: Converter[] = [
     to: "HTML",
     from: ["md", "markdown", "mdown"],
     category: "documents",
-    description: "Markdown (GFM) vers une page HTML autonome et stylée.",
+    description: {
+      fr: "Markdown (GFM) vers une page HTML autonome et stylée.",
+      en: "Markdown (GFM) to a standalone, styled HTML page.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.html`,
@@ -444,7 +460,10 @@ export const documentConverters: Converter[] = [
     to: "PDF",
     from: ["md", "markdown", "mdown"],
     category: "documents",
-    description: "Markdown rendu en HTML puis imprimé en PDF.",
+    description: {
+      fr: "Markdown rendu en HTML puis imprimé en PDF.",
+      en: "Markdown rendered as HTML, then printed to PDF.",
+    },
     options: [PAGE_OPTION],
     run: each(async (file, ctx) => [
       {
@@ -464,7 +483,10 @@ export const documentConverters: Converter[] = [
     to: "Word (.docx)",
     from: ["md", "markdown", "mdown"],
     category: "documents",
-    description: "Markdown vers un document Word éditable.",
+    description: {
+      fr: "Markdown vers un document Word éditable.",
+      en: "Markdown to an editable Word document.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.docx`,
@@ -477,10 +499,13 @@ export const documentConverters: Converter[] = [
   },
   {
     id: "md→txt",
-    to: "Texte brut",
+    to: { fr: "Texte brut", en: "Plain text" },
     from: ["md", "markdown", "mdown"],
     category: "documents",
-    description: "Retire toute la syntaxe Markdown.",
+    description: {
+      fr: "Retire toute la syntaxe Markdown.",
+      en: "Strips all Markdown syntax.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.txt`,
@@ -493,7 +518,10 @@ export const documentConverters: Converter[] = [
     to: "PDF",
     from: ["html", "htm"],
     category: "documents",
-    description: "Rend la page dans un cadre invisible puis la pagine en PDF.",
+    description: {
+      fr: "Rend la page dans un cadre invisible puis la pagine en PDF.",
+      en: "Renders the page in a hidden frame, then paginates it into a PDF.",
+    },
     options: [PAGE_OPTION],
     run: each(async (file, ctx) => [
       {
@@ -510,7 +538,10 @@ export const documentConverters: Converter[] = [
     to: "Word (.docx)",
     from: ["html", "htm"],
     category: "documents",
-    description: "Emballe le HTML dans un .docx ouvrable et éditable dans Word.",
+    description: {
+      fr: "Emballe le HTML dans un .docx ouvrable et éditable dans Word.",
+      en: "Wraps the HTML in a .docx you can open and edit in Word.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.docx`,
@@ -523,7 +554,10 @@ export const documentConverters: Converter[] = [
     to: "Markdown",
     from: ["html", "htm"],
     category: "documents",
-    description: "Reconstruit du Markdown à partir de la structure HTML.",
+    description: {
+      fr: "Reconstruit du Markdown à partir de la structure HTML.",
+      en: "Rebuilds Markdown from the HTML structure.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.md`,
@@ -533,10 +567,13 @@ export const documentConverters: Converter[] = [
   },
   {
     id: "html→txt",
-    to: "Texte brut",
+    to: { fr: "Texte brut", en: "Plain text" },
     from: ["html", "htm"],
     category: "documents",
-    description: "Ne garde que le texte visible de la page.",
+    description: {
+      fr: "Ne garde que le texte visible de la page.",
+      en: "Keeps only the page's visible text.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.txt`,
@@ -549,7 +586,10 @@ export const documentConverters: Converter[] = [
     to: "Image (PNG/JPG)",
     from: ["html", "htm"],
     category: "documents",
-    description: "Capture le rendu complet de la page dans une image.",
+    description: {
+      fr: "Capture le rendu complet de la page dans une image.",
+      en: "Captures the whole rendered page as an image.",
+    },
     options: [
       {
         id: "format",
@@ -563,7 +603,7 @@ export const documentConverters: Converter[] = [
       },
       {
         id: "width",
-        label: "Largeur de rendu",
+        label: { fr: "Largeur de rendu", en: "Render width" },
         type: "number",
         default: 1280,
         min: 320,
@@ -592,10 +632,13 @@ export const documentConverters: Converter[] = [
   },
   {
     id: "pdf→image",
-    to: "Images (page par page)",
+    to: { fr: "Images (page par page)", en: "Images (one per page)" },
     from: ["pdf"],
     category: "documents",
-    description: "Rend chaque page du PDF dans une image indépendante.",
+    description: {
+      fr: "Rend chaque page du PDF dans une image indépendante.",
+      en: "Renders each page of the PDF as a separate image.",
+    },
     multiOutput: true,
     options: [
       {
@@ -610,13 +653,16 @@ export const documentConverters: Converter[] = [
       },
       {
         id: "scale",
-        label: "Résolution",
+        label: { fr: "Résolution", en: "Resolution" },
         type: "select",
         default: "2",
         choices: [
-          { value: "1", label: "96 dpi (écran)" },
-          { value: "2", label: "192 dpi (recommandé)" },
-          { value: "3", label: "288 dpi (impression)" },
+          { value: "1", label: { fr: "96 dpi (écran)", en: "96 dpi (screen)" } },
+          {
+            value: "2",
+            label: { fr: "192 dpi (recommandé)", en: "192 dpi (recommended)" },
+          },
+          { value: "3", label: { fr: "288 dpi (impression)", en: "288 dpi (print)" } },
         ],
       },
     ],
@@ -651,11 +697,13 @@ export const documentConverters: Converter[] = [
   },
   {
     id: "pdf→txt",
-    to: "Texte brut",
+    to: { fr: "Texte brut", en: "Plain text" },
     from: ["pdf"],
     category: "documents",
-    description:
-      "Extrait la couche texte du PDF (sans OCR : un PDF scanné ne donnera rien).",
+    description: {
+      fr: "Extrait la couche texte du PDF (sans OCR : un PDF scanné ne donnera rien).",
+      en: "Extracts the PDF's text layer (no OCR: a scanned PDF yields nothing).",
+    },
     run: each(async (file, ctx) => {
       const { pdf, close } = await loadPdf(file);
       const chunks: string[] = [];
@@ -682,9 +730,10 @@ export const documentConverters: Converter[] = [
       await close();
       const text = chunks.join("\n\n---\n\n").trim();
       if (!text) {
-        throw new Error(
-          "Ce PDF ne contient aucune couche texte (document scanné ou entièrement graphique). Convertissez-le en images à la place.",
-        );
+        throw new LocalizedError({
+          fr: "Ce PDF ne contient aucune couche texte (document scanné ou entièrement graphique). Convertissez-le en images à la place.",
+          en: "This PDF has no text layer (a scanned or fully graphical document). Convert it to images instead.",
+        });
       }
       return [
         { name: `${baseOf(file.name)}.txt`, blob: textBlob(text) },
@@ -696,7 +745,10 @@ export const documentConverters: Converter[] = [
     to: "HTML",
     from: ["rtf"],
     category: "documents",
-    description: "Lit le texte enrichi et restitue gras, italique et paragraphes.",
+    description: {
+      fr: "Lit le texte enrichi et restitue gras, italique et paragraphes.",
+      en: "Reads the rich text and keeps bold, italics and paragraphs.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.html`,
@@ -709,10 +761,13 @@ export const documentConverters: Converter[] = [
   },
   {
     id: "rtf→txt",
-    to: "Texte brut",
+    to: { fr: "Texte brut", en: "Plain text" },
     from: ["rtf"],
     category: "documents",
-    description: "Retire tout le balisage RTF.",
+    description: {
+      fr: "Retire tout le balisage RTF.",
+      en: "Strips all RTF markup.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.txt`,
@@ -725,7 +780,10 @@ export const documentConverters: Converter[] = [
     to: "Markdown",
     from: ["rtf"],
     category: "documents",
-    description: "Texte enrichi vers Markdown.",
+    description: {
+      fr: "Texte enrichi vers Markdown.",
+      en: "Rich text to Markdown.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.md`,
@@ -741,7 +799,10 @@ export const documentConverters: Converter[] = [
     to: "PDF",
     from: ["txt", "log"],
     category: "documents",
-    description: "Met en page le texte brut dans un PDF lisible.",
+    description: {
+      fr: "Met en page le texte brut dans un PDF lisible.",
+      en: "Lays out plain text in a readable PDF.",
+    },
     options: [PAGE_OPTION],
     run: each(async (file, ctx) => [
       {

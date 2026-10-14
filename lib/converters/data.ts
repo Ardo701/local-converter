@@ -169,13 +169,19 @@ async function parseXml(text: string): Promise<unknown> {
 
 const DELIMITER_OPTION = {
   id: "delimiter",
-  label: "Séparateur",
+  label: { fr: "Séparateur", en: "Delimiter" },
   type: "select" as const,
   default: ",",
   choices: [
-    { value: ",", label: "Virgule (,)" },
-    { value: ";", label: "Point-virgule (;) — Excel FR" },
-    { value: "\t", label: "Tabulation" },
+    { value: ",", label: { fr: "Virgule (,)", en: "Comma (,)" } },
+    {
+      value: ";",
+      label: {
+        fr: "Point-virgule (;) — Excel FR",
+        en: "Semicolon (;) — European Excel",
+      },
+    },
+    { value: "\t", label: { fr: "Tabulation", en: "Tab" } },
     { value: "|", label: "Pipe (|)" },
   ],
 };
@@ -206,7 +212,10 @@ export const dataConverters: Converter[] = [
     to: "CSV",
     from: SHEET_IN,
     category: "data",
-    description: "Un fichier CSV par feuille du classeur.",
+    description: {
+      fr: "Un fichier CSV par feuille du classeur.",
+      en: "One CSV file per worksheet.",
+    },
     multiOutput: true,
     options: [DELIMITER_OPTION],
     run: each(async (file, ctx) => {
@@ -230,7 +239,10 @@ export const dataConverters: Converter[] = [
     to: "JSON",
     from: SHEET_IN,
     category: "data",
-    description: "Chaque feuille devient un tableau d'objets.",
+    description: {
+      fr: "Chaque feuille devient un tableau d'objets.",
+      en: "Each sheet becomes an array of objects.",
+    },
     run: each(async (file) => {
       const XLSX = await sheetjs();
       const workbook = await readWorkbook(file);
@@ -261,7 +273,10 @@ export const dataConverters: Converter[] = [
     to: "HTML",
     from: SHEET_IN,
     category: "data",
-    description: "Le classeur rendu sous forme de tableaux HTML.",
+    description: {
+      fr: "Le classeur rendu sous forme de tableaux HTML.",
+      en: "The workbook rendered as HTML tables.",
+    },
     run: each(async (file) => {
       const XLSX = await sheetjs();
       const workbook = await readWorkbook(file);
@@ -286,7 +301,10 @@ export const dataConverters: Converter[] = [
     to: "XML",
     from: SHEET_IN,
     category: "data",
-    description: "Chaque ligne devient un élément <row>.",
+    description: {
+      fr: "Chaque ligne devient un élément <row>.",
+      en: "Each row becomes a <row> element.",
+    },
     run: each(async (file) => {
       const XLSX = await sheetjs();
       const workbook = await readWorkbook(file);
@@ -307,7 +325,10 @@ export const dataConverters: Converter[] = [
     to: "JSON",
     from: ["csv", "tsv"],
     category: "data",
-    description: "En-têtes détectés automatiquement, types numériques inférés.",
+    description: {
+      fr: "En-têtes détectés automatiquement, types numériques inférés.",
+      en: "Headers detected automatically, numeric types inferred.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.json`,
@@ -323,7 +344,10 @@ export const dataConverters: Converter[] = [
     to: "Excel (.xlsx)",
     from: ["csv", "tsv"],
     category: "data",
-    description: "Un vrai classeur Excel, prêt à ouvrir.",
+    description: {
+      fr: "Un vrai classeur Excel, prêt à ouvrir.",
+      en: "A real Excel workbook, ready to open.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.xlsx`,
@@ -338,7 +362,10 @@ export const dataConverters: Converter[] = [
     to: "XML",
     from: ["csv", "tsv"],
     category: "data",
-    description: "Chaque ligne devient un élément <row>.",
+    description: {
+      fr: "Chaque ligne devient un élément <row>.",
+      en: "Each row becomes a <row> element.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.xml`,
@@ -354,7 +381,10 @@ export const dataConverters: Converter[] = [
     to: "HTML",
     from: ["csv", "tsv"],
     category: "data",
-    description: "Un tableau HTML stylé et autonome.",
+    description: {
+      fr: "Un tableau HTML stylé et autonome.",
+      en: "A standalone, styled HTML table.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.html`,
@@ -370,7 +400,10 @@ export const dataConverters: Converter[] = [
     to: "CSV",
     from: ["json"],
     category: "data",
-    description: "Aplatit les objets imbriqués en colonnes `parent.enfant`.",
+    description: {
+      fr: "Aplatit les objets imbriqués en colonnes `parent.enfant`.",
+      en: "Flattens nested objects into `parent.child` columns.",
+    },
     options: [DELIMITER_OPTION],
     run: each(async (file, ctx) => [
       {
@@ -390,7 +423,10 @@ export const dataConverters: Converter[] = [
     to: "Excel (.xlsx)",
     from: ["json"],
     category: "data",
-    description: "Le tableau JSON devient une feuille de calcul.",
+    description: {
+      fr: "Le tableau JSON devient une feuille de calcul.",
+      en: "The JSON array becomes a spreadsheet.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.xlsx`,
@@ -408,7 +444,10 @@ export const dataConverters: Converter[] = [
     to: "XML",
     from: ["json"],
     category: "data",
-    description: "Sérialise le JSON en arborescence XML.",
+    description: {
+      fr: "Sérialise le JSON en arborescence XML.",
+      en: "Serializes the JSON as an XML tree.",
+    },
     run: each(async (file) => {
       const { XMLBuilder } = await import("fast-xml-parser");
       const builder = new XMLBuilder({
@@ -433,7 +472,10 @@ export const dataConverters: Converter[] = [
     to: "HTML",
     from: ["json"],
     category: "data",
-    description: "Un tableau HTML à partir du JSON aplati.",
+    description: {
+      fr: "Un tableau HTML à partir du JSON aplati.",
+      en: "An HTML table built from the flattened JSON.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.html`,
@@ -454,7 +496,10 @@ export const dataConverters: Converter[] = [
     to: "JSON",
     from: ["xml", "rss", "atom", "svg"],
     category: "data",
-    description: "Attributs préservés avec le préfixe @.",
+    description: {
+      fr: "Attributs préservés avec le préfixe @.",
+      en: "Attributes kept with an @ prefix.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.json`,
@@ -470,7 +515,10 @@ export const dataConverters: Converter[] = [
     to: "CSV",
     from: ["xml", "rss", "atom"],
     category: "data",
-    description: "Repère la liste d'éléments répétés et l'aplatit en tableau.",
+    description: {
+      fr: "Repère la liste d'éléments répétés et l'aplatit en tableau.",
+      en: "Finds the list of repeated elements and flattens it into a table.",
+    },
     options: [DELIMITER_OPTION],
     run: each(async (file, ctx) => [
       {
@@ -490,7 +538,10 @@ export const dataConverters: Converter[] = [
     to: "Excel (.xlsx)",
     from: ["xml", "rss", "atom"],
     category: "data",
-    description: "La liste d'éléments répétés devient une feuille Excel.",
+    description: {
+      fr: "La liste d'éléments répétés devient une feuille Excel.",
+      en: "The list of repeated elements becomes an Excel sheet.",
+    },
     run: each(async (file) => [
       {
         name: `${baseOf(file.name)}.xlsx`,

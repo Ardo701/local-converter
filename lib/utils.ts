@@ -1,3 +1,5 @@
+import { LocalizedError, type Locale } from "./i18n";
+
 export function extOf(name: string): string {
   const i = name.lastIndexOf(".");
   return i === -1 ? "" : name.slice(i + 1).toLowerCase();
@@ -8,9 +10,14 @@ export function baseOf(name: string): string {
   return i === -1 ? name : name.slice(0, i);
 }
 
-export function humanSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} o`;
-  const units = ["Ko", "Mo", "Go", "To"];
+const SIZE_UNITS: Record<Locale, string[]> = {
+  fr: ["o", "Ko", "Mo", "Go", "To"],
+  en: ["B", "KB", "MB", "GB", "TB"],
+};
+
+export function humanSize(bytes: number, locale: Locale): string {
+  const [byte, ...units] = SIZE_UNITS[locale];
+  if (bytes < 1024) return `${bytes} ${byte}`;
   let v = bytes / 1024;
   let u = 0;
   while (v >= 1024 && u < units.length - 1) {
@@ -87,7 +94,7 @@ export function canvasToBlob(
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
-      (b) => (b ? resolve(b) : reject(new Error("Encodage impossible"))),
+      (b) => (b ? resolve(b) : reject(new LocalizedError({ fr: "Encodage impossible", en: "Encoding failed" }))),
       type,
       quality,
     );
@@ -110,7 +117,7 @@ export async function loadBitmap(
     return await new Promise<HTMLImageElement>((resolve, reject) => {
       const img = new Image();
       img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error("Image illisible"));
+      img.onerror = () => reject(new LocalizedError({ fr: "Image illisible", en: "Unreadable image" }));
       img.src = url;
     });
   } finally {

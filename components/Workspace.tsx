@@ -6,6 +6,8 @@ import FileList from "./FileList";
 import OptionsPanel from "./OptionsPanel";
 import Results from "./Results";
 import TargetPicker from "./TargetPicker";
+import { useLocale } from "./LocaleProvider";
+import { LocalizedError, localize, type Localized } from "@/lib/i18n";
 import { converterById, matchingConverters } from "@/lib/registry";
 import type { OutFile } from "@/lib/types";
 import { dedupeNames, humanSize } from "@/lib/utils";
@@ -47,6 +49,7 @@ function Step({
 }
 
 export default function Workspace() {
+  const { locale, t } = useLocale();
   const [files, setFiles] = useState<File[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [optionValues, setOptionValues] = useState<
@@ -54,8 +57,8 @@ export default function Workspace() {
   >({});
   const [status, setStatus] = useState<Status>("idle");
   const [progress, setProgress] = useState(0);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<Localized>("");
+  const [error, setError] = useState<Localized | null>(null);
   const [results, setResults] = useState<OutFile[]>([]);
   const sectionRef = useRef<HTMLElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -83,9 +86,14 @@ export default function Workspace() {
       return;
     }
     const defaults: Record<string, string | number | boolean> = {};
-    for (const option of selected.options) defaults[option.id] = option.default;
+    for (const option of selected.options) {
+      defaults[option.id] =
+        option.type === "select"
+          ? localize(option.default, locale)
+          : option.default;
+    }
     setOptionValues(defaults);
-  }, [selected]);
+  }, [selected, locale]);
 
   const addFiles = useCallback((incoming: File[]) => {
     setResults([]);
@@ -113,7 +121,7 @@ export default function Workspace() {
     if (!selected || !files.length) return;
     setStatus("running");
     setProgress(0);
-    setMessage("Préparation");
+    setMessage({ fr: "Préparation", en: "Preparing" });
     setError(null);
     setResults([]);
 
@@ -125,7 +133,12 @@ export default function Workspace() {
           if (note) setMessage(note);
         },
       });
-      if (!output.length) throw new Error("Aucun fichier n’a été produit.");
+      if (!output.length) {
+        throw new LocalizedError({
+          fr: "Aucun fichier n’a été produit.",
+          en: "No file was produced.",
+        });
+      }
       setResults(dedupeNames(output));
       setStatus("done");
       setProgress(1);
@@ -139,9 +152,14 @@ export default function Workspace() {
       console.error(caught);
       setStatus("error");
       setError(
-        caught instanceof Error
-          ? caught.message
-          : "La conversion a échoué. Le fichier est peut-être corrompu.",
+        caught instanceof LocalizedError
+          ? caught.text
+          : caught instanceof Error
+            ? caught.message
+            : {
+                fr: "La conversion a échoué. Le fichier est peut-être corrompu.",
+                en: "The conversion failed. The file may be corrupted.",
+              },
       );
     }
   }, [files, optionValues, selected]);
@@ -161,16 +179,16 @@ export default function Workspace() {
       <div className="border border-edge bg-surface">
         <Step
           number={stepNumbers.files}
-          title="Fichiers"
+          title={t({ fr: "Fichiers", en: "Files" })}
           meta={
             files.length
-              ? `${files.length} · ${humanSize(totalSize)}`
+              ? `${files.length} · ${humanSize(totalSize, locale)}`
               : undefined
           }
           action={
             files.length
               ? {
-                  label: "Tout retirer",
+                  label: t({ fr: "Tout retirer", en: "Remove all" }),
                   disabled: busy,
                   onClick: () => {
                     setFiles([]);
@@ -201,8 +219,11 @@ export default function Workspace() {
             <div className="border-t border-edge">
               <Step
                 number={stepNumbers.format}
-                title="Format de sortie"
-                meta={`${available.length} possible${available.length > 1 ? "s" : ""}`}
+                title={t({ fr: "Format de sortie", en: "Output format" })}
+                meta={t({
+                  fr: `${available.length} possible${available.length > 1 ? "s" : ""}`,
+                  en: `${available.length} available`,
+                })}
               />
               <TargetPicker
                 converters={available}
@@ -214,7 +235,10 @@ export default function Workspace() {
 
             {selected?.options?.length ? (
               <div className="border-t border-edge">
-                <Step number={stepNumbers.settings} title="Réglages" />
+                <Step
+                  number={stepNumbers.settings}
+                  title={t({ fr: "Réglages", en: "Settings" })}
+                />
                 <OptionsPanel
                   options={selected.options}
                   values={optionValues}
@@ -235,15 +259,22 @@ export default function Workspace() {
                         <span className="nums text-accent">
                           {String(Math.round(progress * 100)).padStart(3, " ")}%
                         </span>
-                        <span className="ml-3 text-muted">{message}</span>
+                        <span className="ml-3 text-muted">{t(message)}</span>
                       </>
                     ) : status === "done" ? (
-                      <span className="text-muted">Terminé.</span>
+                      <span className="text-muted">{t({ fr: "Terminé.", en: "Done." })}</span>
                     ) : (
                       <span>
-                        {files.length} fichier{files.length > 1 ? "s" : ""} →{" "}
-                        {selected.to}
-                        {selected.heavy && " · moteur WebAssembly au 1er usage"}
+                        {t({
+                          fr: `${files.length} fichier${files.length > 1 ? "s" : ""}`,
+                          en: `${files.length} file${files.length === 1 ? "" : "s"}`,
+                        })}{" "}
+                        → {t(selected.to)}
+                        {selected.heavy &&
+                          t({
+                            fr: " · moteur WebAssembly au 1er usage",
+                            en: " · WebAssembly engine on first use",
+                          })}
                       </span>
                     )}
                   </p>
@@ -253,7 +284,9 @@ export default function Workspace() {
                     disabled={busy || !available.length}
                     className="shrink-0 rounded-[3px] bg-ink px-6 py-2 text-[13.5px] font-medium text-paper transition-colors duration-100 hover:bg-accent disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-ink"
                   >
-                    {busy ? "Conversion…" : "Convertir"}
+                    {busy
+                      ? t({ fr: "Conversion…", en: "Converting…" })
+                      : t({ fr: "Convertir", en: "Convert" })}
                   </button>
                 </div>
                 <div className="h-px w-full bg-rule">
@@ -267,8 +300,8 @@ export default function Workspace() {
 
             {error && (
               <div className="border-t border-edge bg-accent-soft px-5 py-3.5">
-                <p className="label text-accent">Échec</p>
-                <p className="mt-1 text-[13.5px] text-ink">{error}</p>
+                <p className="label text-accent">{t({ fr: "Échec", en: "Failed" })}</p>
+                <p className="mt-1 text-[13.5px] text-ink">{t(error)}</p>
               </div>
             )}
 

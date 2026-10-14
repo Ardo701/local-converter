@@ -1,6 +1,7 @@
 "use client";
 
 import { extOf, humanSize } from "@/lib/utils";
+import { useLocale } from "./LocaleProvider";
 
 type Props = {
   files: File[];
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function FileList({ files, onRemove, disabled }: Props) {
+  const { locale, t } = useLocale();
   return (
     <ul>
       {files.map((file, index) => (
@@ -23,13 +25,13 @@ export default function FileList({ files, onRemove, disabled }: Props) {
             {file.name}
           </span>
           <span className="nums shrink-0 font-mono text-[11.5px] text-faint">
-            {humanSize(file.size)}
+            {humanSize(file.size, locale)}
           </span>
           <button
             type="button"
             onClick={() => onRemove(index)}
             disabled={disabled}
-            aria-label={`Retirer ${file.name}`}
+            aria-label={t({ fr: `Retirer ${file.name}`, en: `Remove ${file.name}` })}
             className="-mr-1.5 shrink-0 px-1.5 text-[13px] leading-none text-faint opacity-0 transition-opacity hover:text-accent focus-visible:opacity-100 group-hover:opacity-100 disabled:opacity-30"
           >
             ✕

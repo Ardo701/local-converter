@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { acceptAttribute } from "@/lib/registry";
+import { useLocale } from "./LocaleProvider";
 
 type Props = {
   onFiles: (files: File[]) => void;
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export default function Dropzone({ onFiles, compact = false }: Props) {
+  const { t } = useLocale();
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const depth = useRef(0);
@@ -53,7 +55,8 @@ export default function Dropzone({ onFiles, compact = false }: Props) {
     >
       {compact ? (
         <p className="label text-muted">
-          <span className="text-accent">+</span>&nbsp;&nbsp;Ajouter des fichiers
+          <span className="text-accent">+</span>&nbsp;&nbsp;
+          {t({ fr: "Ajouter des fichiers", en: "Add files" })}
         </p>
       ) : (
         <>
@@ -79,14 +82,17 @@ export default function Dropzone({ onFiles, compact = false }: Props) {
             />
           </svg>
           <p className="mt-5 text-[15px]">
-            Déposez vos fichiers, ou{" "}
+            {t({ fr: "Déposez vos fichiers, ou", en: "Drop your files, or" })}{" "}
             <span className="text-accent underline underline-offset-[3px]">
-              parcourez votre disque
+              {t({ fr: "parcourez votre disque", en: "browse your disk" })}
             </span>
             .
           </p>
           <p className="mt-1.5 text-[13px] text-faint">
-            Ils sont lus en mémoire. Aucune requête réseau ne les transporte.
+            {t({
+              fr: "Ils sont lus en mémoire. Aucune requête réseau ne les transporte.",
+              en: "They are read in memory. No network request ever carries them.",
+            })}
           </p>
         </>
       )}
