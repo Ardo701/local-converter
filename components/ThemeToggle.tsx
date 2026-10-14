@@ -27,28 +27,26 @@ function readStored(): Mode {
   return "system";
 }
 
+const OVERRIDE_ID = "theme-color-override";
+
 /* In Auto the two media-scoped tags from the layout are the right answer: they
-   follow the system with no script at all. A forced theme needs a single tag
-   instead, since media queries cannot express a choice. */
+   follow the system with no script at all. A forced theme adds one unscoped
+   tag ahead of them, since the browser uses the first match. The layout's
+   tags are left alone: React owns them, and removing them makes its next
+   update of the head crash. */
 function writeBarColour(mode: Mode) {
-  const head = document.head;
-  head
-    .querySelectorAll('meta[name="theme-color"]')
-    .forEach((tag) => tag.remove());
-  const entries: [string, string | null][] =
-    mode === "system"
-      ? [
-          [BAR.light, "(prefers-color-scheme: light)"],
-          [BAR.dark, "(prefers-color-scheme: dark)"],
-        ]
-      : [[BAR[mode], null]];
-  for (const [content, media] of entries) {
-    const tag = document.createElement("meta");
-    tag.name = "theme-color";
-    tag.content = content;
-    if (media) tag.media = media;
-    head.append(tag);
+  let tag = document.getElementById(OVERRIDE_ID) as HTMLMetaElement | null;
+  if (mode === "system") {
+    tag?.remove();
+    return;
   }
+  if (!tag) {
+    tag = document.createElement("meta");
+    tag.id = OVERRIDE_ID;
+    tag.name = "theme-color";
+  }
+  tag.content = BAR[mode];
+  document.head.prepend(tag);
 }
 
 export default function ThemeToggle() {
