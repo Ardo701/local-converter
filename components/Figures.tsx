@@ -14,7 +14,10 @@ export default function Figures() {
     },
     {
       key: "bytes",
-      label: t({ fr: "Octets envoyés", en: "Bytes sent" }),
+      label: t({
+        fr: "Octets envoyés à l’extérieur",
+        en: "Bytes sent outside",
+      }),
       value: 0,
     },
   ];
