@@ -82,6 +82,15 @@ body {
   outline-offset: 2px;
 }
 
+/* Tailwind 4 leaves buttons on the default arrow. In the base layer so a
+   `disabled:cursor-not-allowed` utility still wins. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 /* The active segments of the theme and language switches are derived from
    the attributes the inline scripts set, not from React state, so they are
    already right on the first paint. No data-theme means Auto. */
