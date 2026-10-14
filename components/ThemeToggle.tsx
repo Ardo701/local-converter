@@ -108,7 +108,7 @@ export default function ThemeToggle() {
           aria-checked={mode === option.id}
           title={t(option.title)}
           onClick={() => choose(option.id)}
-          className={`label px-1.5 py-1 text-muted sm:px-2 transition-colors hover:text-ink ${
+          className={`label px-1 py-1 text-muted sm:px-2 transition-colors hover:text-ink ${
             index > 0 ? "border-l border-edge" : ""
           }`}
         >

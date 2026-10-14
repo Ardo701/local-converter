@@ -2,6 +2,7 @@
 
 import Catalogue from "@/components/Catalogue";
 import Figures from "@/components/Figures";
+import GitHubLink from "@/components/GitHubLink";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useLocale } from "@/components/LocaleProvider";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -40,10 +41,10 @@ export default function Home() {
   return (
     <>
       <header className="border-b border-edge">
-        <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-3 px-4 sm:px-6">
+        <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-2 px-4 sm:gap-3 sm:px-6">
           <a
             href="#"
-            className="display shrink-0 text-[17px] tracking-normal sm:text-[20px]"
+            className="display shrink-0 text-[15px] tracking-normal sm:text-[20px]"
           >
             {locale === "en" ? (
               <>
@@ -55,7 +56,9 @@ export default function Home() {
               </>
             )}
           </a>
-          <nav className="flex items-center gap-3 sm:gap-6">
+          {/* Phones get tighter type, gaps and switch padding so the brand,
+              both switches and the GitHub link fit from 360 px. */}
+          <nav className="flex items-center gap-2 sm:gap-6">
             <span className="label hidden text-faint lg:inline">
               {t({ fr: "Rien ne quitte cet onglet", en: "Nothing leaves this tab" })}
             </span>
@@ -71,6 +74,7 @@ export default function Home() {
               <LanguageToggle />
               <ThemeToggle />
             </div>
+            <GitHubLink />
           </nav>
         </div>
       </header>

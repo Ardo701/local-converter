@@ -29,7 +29,7 @@ export default function LanguageToggle() {
           aria-checked={locale === option.id}
           title={option.title}
           onClick={() => setLocale(option.id)}
-          className={`label px-1.5 py-1 text-muted sm:px-2 transition-colors hover:text-ink ${
+          className={`label px-1 py-1 text-muted sm:px-2 transition-colors hover:text-ink ${
             index > 0 ? "border-l border-edge" : ""
           }`}
         >
